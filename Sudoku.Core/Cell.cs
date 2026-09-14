@@ -6,17 +6,20 @@ public class Cell
     public bool IsGiven { get; }
     private ushort Candidates = 0;  // bitmask of candidates
 
-    public Cell() {
+    public Cell()
+    {
         Value = 0;
         IsGiven = false;
     }
 
-    public Cell(byte Value) {
+    public Cell(byte Value)
+    {
         this.Value = Value;
         this.IsGiven = true;
     }
 
-    public void addCandidate(byte cand) {
+    public void addCandidate(byte cand)
+    {
         if (cand > 8)
             throw new ArgumentOutOfRangeException(nameof(cand));
 
@@ -31,8 +34,10 @@ public class Cell
         return (Candidates & (ushort)(1 << cand)) != 0;
     }
 
-    public IEnumerable<byte> GetCandidates() {
-        for (byte i = 0; i < 9; i++) {
+    public IEnumerable<byte> GetCandidates()
+    {
+        for (byte i = 0; i < 9; i++)
+        {
             if (HasCandidate(i))
                 yield return i;
         }
