@@ -1,4 +1,5 @@
 ﻿using Sudoku.Core;
+using Sudoku.Core.Grid;
 
 namespace Sudoku.Tests;
 
@@ -30,7 +31,7 @@ public class CellTests
         var cell = new Cell();
 
         byte candidate = 3;
-        cell.addCandidate(candidate);
+        cell.AddCandidate(candidate);
 
         Assert.True(cell.HasCandidate(candidate));
     }
@@ -44,9 +45,9 @@ public class CellTests
         byte candidate2 = 4;
         byte candidate3 = 8;
 
-        cell.addCandidate(candidate1);
-        cell.addCandidate(candidate2);
-        cell.addCandidate(candidate3);
+        cell.AddCandidate(candidate1);
+        cell.AddCandidate(candidate2);
+        cell.AddCandidate(candidate3);
 
         var candidates = cell.GetCandidates().ToArray();
 
@@ -58,7 +59,7 @@ public class CellTests
     {
         var cell = new Cell();
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => cell.addCandidate(9));
+        Assert.Throws<ArgumentOutOfRangeException>(() => cell.AddCandidate(9));
     }
 
     [Fact]

@@ -1,4 +1,5 @@
 using Sudoku.Core;
+using Sudoku.Core.Grid;
 using Sudoku.Core.Constraints;
 
 namespace Sudoku.Tests.Constraints;

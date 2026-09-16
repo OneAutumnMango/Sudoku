@@ -1,3 +1,4 @@
+using Sudoku.Core.Grid;
 using Sudoku.Core.Constraints;
 
 namespace Sudoku.Core.RuleSets;

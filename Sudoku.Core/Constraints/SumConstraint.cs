@@ -1,3 +1,5 @@
+using Sudoku.Core.Grid;
+
 namespace Sudoku.Core.Constraints;
 
 public class SumConstraint : IConstraint

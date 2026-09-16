@@ -1,4 +1,4 @@
-namespace Sudoku.Core;
+namespace Sudoku.Core.Grid;
 
 public class Board
 {
