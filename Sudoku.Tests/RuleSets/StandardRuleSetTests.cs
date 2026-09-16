@@ -7,25 +7,29 @@ namespace Sudoku.Tests.RuleSets;
 public class StandardRuleSetTests
 {
     [Fact]
-    public void IsSatisfied_WithValidBoard_ReturnsTrue()
+    public void FindFirstUnsatisfiedConstraint_WithValidBoard_ReturnsNone()
     {
         var board = CreateSolvedBoard();
-        var groups = board.Rows.Concat(board.Columns).Concat(board.Blocks).ToList();
-        var ruleSet = new StandardRuleSet(groups);
+        var ruleSet = new StandardRuleSet();
+        ruleSet.Initialize(board);
 
-        Assert.True(ruleSet.IsSatisfied());
+        var result = ruleSet.FindFirstUnsatisfiedConstraint();
+
+        Assert.True(result.IsNone);
     }
 
     [Fact]
-    public void IsSatisfied_WithDuplicateInRow_ReturnsFalse()
+    public void FindFirstUnsatisfiedConstraint_WithDuplicateInRow_ReturnsSome()
     {
         var board = CreateSolvedBoard();
         board[0, 0].Value = 5;
 
-        var groups = board.Rows.Concat(board.Columns).Concat(board.Blocks).ToList();
-        var ruleSet = new StandardRuleSet(groups);
+        var ruleSet = new StandardRuleSet();
+        ruleSet.Initialize(board);
 
-        Assert.False(ruleSet.IsSatisfied());
+        var result = ruleSet.FindFirstUnsatisfiedConstraint();
+
+        Assert.True(result.IsSome);
     }
 
     private static Board CreateSolvedBoard()

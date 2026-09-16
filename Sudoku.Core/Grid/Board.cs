@@ -11,6 +11,14 @@ public class Board
     public IReadOnlyList<IReadOnlyList<Cell>> Columns { get; }
     public IReadOnlyList<IReadOnlyList<Cell>> Blocks { get; }
 
+    private IReadOnlyList<IReadOnlyList<Cell>>? _allGroups;
+    public IReadOnlyList<IReadOnlyList<Cell>> AllGroups =>
+        _allGroups ??= Rows
+            .Cast<IReadOnlyList<Cell>>()
+            .Concat(Columns.Cast<IReadOnlyList<Cell>>())
+            .Concat(Blocks.Cast<IReadOnlyList<Cell>>())
+            .ToList();
+
     public Cell this[int row, int col] => _cells[row, col];
 
     public Board(int size)
@@ -67,5 +75,12 @@ public class Board
         Rows = _rows.Select(r => (IReadOnlyList<Cell>)r).ToList();
         Columns = _columns.Select(c => (IReadOnlyList<Cell>)c).ToList();
         Blocks = _blocks.Select(b => (IReadOnlyList<Cell>)b).ToList();
+    }
+
+    public IEnumerable<(int row, int col, Cell cell)> EnumerateAllCells()
+    {
+        for (int row = 0; row < 9; row++)
+            for (int col = 0; col < 9; col++)
+                yield return (row, col, _cells[row, col]);
     }
 }
