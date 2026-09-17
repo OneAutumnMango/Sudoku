@@ -6,32 +6,35 @@ using Sudoku.Core.Utils;
 
 public class ValidBoardGenerator
 {
-    public static Board GenerateMinimalBoard(IRuleSet ruleSet)
+    public static Puzzle GenerateMinimalBoard(Puzzle puzzle)
     {
-        var board = Generate(ruleSet);
-        Minimise(board, ruleSet);
-        return board;
+        ArgumentNullException.ThrowIfNull(puzzle);
+
+        Generate(puzzle);
+        Minimise(puzzle);
+        return puzzle;
     }
 
-    public static Board Generate(IRuleSet ruleSet)
+    public static Puzzle Generate(Puzzle puzzle)
     {
-        ArgumentNullException.ThrowIfNull(ruleSet);
+        ArgumentNullException.ThrowIfNull(puzzle);
 
-        var board = new Board(9);
         var rng = Random.Shared;
 
-        if (!Fill(board, ruleSet, 0, rng))
+        if (!Fill(puzzle, 0, rng))
         {
             throw new InvalidOperationException("Failed to generate a valid board.");
         }
 
-        return board;
+        return puzzle;
     }
 
-    public static void Minimise(Board board, IRuleSet ruleSet)
+    public static Puzzle Minimise(Puzzle puzzle)
     {
-        ArgumentNullException.ThrowIfNull(board);
-        ArgumentNullException.ThrowIfNull(ruleSet);
+        ArgumentNullException.ThrowIfNull(puzzle);
+
+        var board = puzzle.Board;
+        var ruleSet = puzzle.RuleSet;
 
         if (board.EnumerateEmptyCells().Any())
             throw new InvalidOperationException("Provided board contains empty cells.");
@@ -39,12 +42,17 @@ public class ValidBoardGenerator
             throw new InvalidOperationException("Provided board does not satisfy the rule set.");
 
         var rng = Random.Shared;
-        GreedyRemoval(board, ruleSet, rng);
+        GreedyRemoval(puzzle, rng);
+
+        return puzzle;
     }
 
-    private static bool GreedyRemoval(Board board, IRuleSet ruleSet, Random rng)
+    private static bool GreedyRemoval(Puzzle puzzle, Random rng)
     {
         var anyRemoved = false;
+        var board = puzzle.Board;
+        var ruleSet = puzzle.RuleSet;
+
         var cells = board.EnumerateFilledCells()
             .Select(_ => _.cell)
             .OrderBy(_ => rng.Next())
@@ -53,29 +61,32 @@ public class ValidBoardGenerator
         foreach (var cell in cells)
         {
             var originalValue = cell.Value;
-            SetCellValue(board, ruleSet, cell, 0);
+            SetCellValue(puzzle, cell, 0);
 
-            if (IsUniqueSolution(board, ruleSet))
+            if (IsUniqueSolution(puzzle))
             {
                 anyRemoved = true;
                 continue;
             }
 
-            SetCellValue(board, ruleSet, cell, originalValue);
+            SetCellValue(puzzle, cell, originalValue);
         }
 
         return anyRemoved;
     }
 
-    private static bool IsUniqueSolution(Board board, IRuleSet ruleSet)
+    private static bool IsUniqueSolution(Puzzle puzzle)
     {
-        return CountSolutions(board, ruleSet, limit: 2) == 1;
+        return CountSolutions(puzzle, limit: 2) == 1;
     }
 
-    private static int CountSolutions(Board board, IRuleSet ruleSet, int limit)
+    private static int CountSolutions(Puzzle puzzle, int limit)
     {
         if (limit <= 0)
             return 0;
+
+        var board = puzzle.Board;
+        var ruleSet = puzzle.RuleSet;
 
         ruleSet.ComputeAndFillCandidates(board);
 
@@ -90,11 +101,11 @@ public class ValidBoardGenerator
         var count = 0;
         foreach (var candidate in bestCandidates)
         {
-            SetCellValue(board, ruleSet, bestCell, (byte)(candidate + 1));
+            SetCellValue(puzzle, bestCell, (byte)(candidate + 1));
 
-            count += CountSolutions(board, ruleSet, limit - count);
+            count += CountSolutions(puzzle, limit - count);
 
-            SetCellValue(board, ruleSet, bestCell, 0);
+            SetCellValue(puzzle, bestCell, 0);
 
             if (count >= limit)
                 return count;
@@ -103,8 +114,11 @@ public class ValidBoardGenerator
         return count;
     }
 
-    private static bool Fill(Board board, IRuleSet ruleSet, int index, Random rng)
+    private static bool Fill(Puzzle puzzle, int index, Random rng)
     {
+        var board = puzzle.Board;
+        var ruleSet = puzzle.RuleSet;
+
         if (index >= board.Size * board.Size)  // geq for safety?
             return true;
 
@@ -113,7 +127,7 @@ public class ValidBoardGenerator
 
         // safeguard and allows if i ever want to set cells in the future
         if (board[row, col].Value != 0)
-            return Fill(board, ruleSet, index + 1, rng);
+            return Fill(puzzle, index + 1, rng);
 
         ruleSet.ComputeAndFillCandidates(board);
         var candidates = board[row, col].GetCandidates()
@@ -122,12 +136,12 @@ public class ValidBoardGenerator
 
         foreach (byte value in candidates)
         {
-            SetCellValue(board, ruleSet, board[row, col], (byte)(value + 1));
+            SetCellValue(puzzle, board[row, col], (byte)(value + 1));
 
-            if (Fill(board, ruleSet, index + 1, rng))
+            if (Fill(puzzle, index + 1, rng))
                 return true;
 
-            SetCellValue(board, ruleSet, board[row, col], 0);
+            SetCellValue(puzzle, board[row, col], 0);
         }
 
         return false;
@@ -159,9 +173,10 @@ public class ValidBoardGenerator
         return bestSelection;
     }
 
-    private static void SetCellValue(Board board, IRuleSet ruleSet, Cell cell, byte value)
+    private static void SetCellValue(Puzzle puzzle, Cell cell, byte value)
     {
         cell.Value = value;
-        ruleSet.ComputeAndFillCandidates(board);
+        puzzle.RuleSet
+            .ComputeAndFillCandidates(puzzle.Board);
     }
 }

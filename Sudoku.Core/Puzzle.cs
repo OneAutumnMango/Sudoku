@@ -3,20 +3,14 @@ using Sudoku.Core.RuleSets;
 
 namespace Sudoku.Core;
 
-public class Puzzle
+public class Puzzle(IRuleSet ruleset)
 {
-    private readonly IRuleSet _ruleset;
-    private readonly Board _board;
-
-    public Puzzle(IRuleSet ruleset)
-    {
-        _ruleset = ruleset;
-        _board = new Board(9);
-    }
+    public IRuleSet RuleSet { get; } = ruleset;
+    public Board Board { get; } = new Board(9);
 
     public void SetCell(int row, int col, byte value)
     {
-        _board[row, col].Value = value;
+        Board[row, col].Value = value;
     }
 
     public void ClearCell(int row, int col)
@@ -26,11 +20,11 @@ public class Puzzle
 
     public void AddCandidate(int row, int col, byte value)
     {
-        _board[row, col].AddCandidate(value);
+        Board[row, col].AddCandidate(value);
     }
 
     public void RemoveCandidate(int row, int col, byte value)
     {
-        _board[row, col].RemoveCandidate(value);
+        Board[row, col].RemoveCandidate(value);
     }
 }

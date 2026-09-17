@@ -1,4 +1,5 @@
 using System.Reflection;
+using Sudoku.Core;
 using Sudoku.Core.Generator;
 using Sudoku.Core.Grid;
 using Sudoku.Core.RuleSets;
@@ -7,20 +8,19 @@ namespace Sudoku.Tests.Generator;
 
 public class ValidBoardGeneratorTests
 {
-    private static readonly StandardRuleSet standardRuleSet = new();
-    private static readonly Board fixedBoard = ValidBoardGenerator.Generate(standardRuleSet);
-    private static readonly Board fixedMinimalBoard = ValidBoardGenerator.GenerateMinimalBoard(standardRuleSet);
-
     [Fact]
     public void Generate_ReturnsValidBoard_ForStandardRules()
     {
-        Assert.True(standardRuleSet.FindFirstUnsatisfiedConstraint(fixedBoard.Clone()).IsNone);
+        var fixedPuzzle = ValidBoardGenerator.Generate(new Puzzle(new StandardRuleSet()));
+
+        Assert.True(new StandardRuleSet().FindFirstUnsatisfiedConstraint(fixedPuzzle.Board.Clone()).IsNone);
     }
 
     [Fact]
     public void GenerateMinimalBoard_DoesNotHave81FilledSquares()
     {
-        var filledSquares = fixedMinimalBoard.EnumerateFilledCells().Count();
+        var fixedMinimalPuzzle = ValidBoardGenerator.GenerateMinimalBoard(new Puzzle(new StandardRuleSet()));
+        var filledSquares = fixedMinimalPuzzle.Board.EnumerateFilledCells().Count();
 
         Assert.True(filledSquares < 81, $"Expected fewer than 81 filled squares, but found {filledSquares}.");
     }
@@ -28,20 +28,23 @@ public class ValidBoardGeneratorTests
     [Fact]
     public void Minimise_Throws_WhenBoardContainsEmptyCells()
     {
-        var board = new Board(9);
-        var ruleSet = new StandardRuleSet();
+        var puzzle = new Puzzle(new StandardRuleSet());
+        var board = puzzle.Board;
 
         board[0, 0].Value = 1;
         board[0, 1].Value = 0;
 
-        Assert.Throws<InvalidOperationException>(() => ValidBoardGenerator.Minimise(board, ruleSet));
+        Assert.Throws<InvalidOperationException>(() =>
+        {
+            ValidBoardGenerator.Minimise(puzzle);
+        });
     }
 
     [Fact]
     public void Minimise_Throws_WhenBoardViolatesRules()
     {
-        var board = new Board(9);
-        var ruleSet = new StandardRuleSet();
+        var puzzle = new Puzzle(new StandardRuleSet());
+        var board = puzzle.Board;
 
         board[0, 0].Value = 1;
         board[0, 1].Value = 1;
@@ -55,7 +58,10 @@ public class ValidBoardGeneratorTests
             }
         }
 
-        Assert.Throws<InvalidOperationException>(() => ValidBoardGenerator.Minimise(board, ruleSet));
+        Assert.Throws<InvalidOperationException>(() =>
+        {
+            ValidBoardGenerator.Minimise(puzzle);
+        });
     }
 
     [Fact]
@@ -66,7 +72,9 @@ public class ValidBoardGeneratorTests
 
         Assert.NotNull(greedyRemoval);
 
-        var result = (bool)greedyRemoval!.Invoke(null, [fixedMinimalBoard.Clone(), standardRuleSet, Random.Shared])!;
+        var result = (bool)greedyRemoval!
+            .Invoke(null, [ValidBoardGenerator.GenerateMinimalBoard(
+                new Puzzle(new StandardRuleSet())), Random.Shared])!;
 
         Assert.False(result);
     }
@@ -79,7 +87,8 @@ public class ValidBoardGeneratorTests
 
         Assert.NotNull(uniqueSolution);
 
-        var result = (bool)uniqueSolution!.Invoke(null, [fixedMinimalBoard.Clone(), standardRuleSet])!;
+        var result = (bool)uniqueSolution!
+            .Invoke(null, [ValidBoardGenerator.GenerateMinimalBoard(new Puzzle(new StandardRuleSet()))])!;
 
         Assert.True(result);
     }
@@ -92,7 +101,8 @@ public class ValidBoardGeneratorTests
 
         Assert.NotNull(countSolutions);
 
-        var result = (int)countSolutions!.Invoke(null, [fixedMinimalBoard.Clone(), standardRuleSet, 2])!;
+        var result = (int)countSolutions!
+            .Invoke(null, [ValidBoardGenerator.GenerateMinimalBoard(new Puzzle(new StandardRuleSet())), 2])!;
 
         Assert.Equal(1, result);
     }
