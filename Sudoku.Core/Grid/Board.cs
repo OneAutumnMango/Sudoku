@@ -5,9 +5,9 @@ public class Board
     public int Size { get; }
 
     private readonly Cell[,] _cells;
-    private readonly List<Cell[]> _rows = new();
-    private readonly List<Cell[]> _columns = new();
-    private readonly List<Cell[]> _blocks = new();
+    private readonly List<Cell[]> _rows = [];
+    private readonly List<Cell[]> _columns = [];
+    private readonly List<Cell[]> _blocks = [];
 
     public IReadOnlyList<IReadOnlyList<Cell>> Rows { get; }
     public IReadOnlyList<IReadOnlyList<Cell>> Columns { get; }
@@ -87,6 +87,35 @@ public class Board
         for (int row = 0; row < Size; row++)
             for (int col = 0; col < Size; col++)
                 yield return (row, col, _cells[row, col]);
+    }
+
+    public IEnumerable<(int row, int col, Cell cell)> EnumerateFilledCells()
+    {
+        for (int row = 0; row < Size; row++)
+            for (int col = 0; col < Size; col++)
+                if (_cells[row, col].Value != 0)
+                    yield return (row, col, _cells[row, col]);
+    }
+
+    public IEnumerable<(int row, int col, Cell cell)> EnumerateEmptyCells()
+    {
+        for (int row = 0; row < Size; row++)
+            for (int col = 0; col < Size; col++)
+                if (_cells[row, col].Value == 0)
+                    yield return (row, col, _cells[row, col]);
+    }
+
+    public Board Clone()
+    {
+        var clone = new Board(Size);
+
+        foreach (var (row, col, cell) in EnumerateAllCells())
+        {
+            clone[row, col].Value = cell.Value;
+            clone[row, col].IsGiven = cell.IsGiven;
+        }
+
+        return clone;
     }
 
     public override string ToString()

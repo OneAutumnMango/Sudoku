@@ -14,7 +14,7 @@ public class Cell
         }
     }
 
-    public bool IsGiven { get; }
+    public bool IsGiven { get; set; }
     private ushort _candidates = 0;  // bitmask of candidates
 
     public Cell()
