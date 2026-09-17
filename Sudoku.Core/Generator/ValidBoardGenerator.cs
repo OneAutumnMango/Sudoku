@@ -53,7 +53,8 @@ public class ValidBoardGenerator
         foreach (var cell in cells)
         {
             var originalValue = cell.Value;
-            cell.Value = 0;
+            var candidateSnapshot = CaptureCandidateSnapshot(board);
+            SetCellValue(board, ruleSet, cell, 0);
 
             if (IsUniqueSolution(board, ruleSet))
             {
@@ -61,7 +62,8 @@ public class ValidBoardGenerator
                 continue;
             }
 
-            cell.Value = originalValue;
+            RestoreCandidateSnapshot(board, candidateSnapshot);
+            SetCellValue(board, ruleSet, cell, originalValue);
         }
 
         return anyRemoved;
@@ -77,7 +79,9 @@ public class ValidBoardGenerator
         if (limit <= 0)
             return 0;
 
-        var bestSelection = GetBestCellCandidates(board, ruleSet);
+        ruleSet.ComputeAndFillCandidates(board);
+
+        var bestSelection = GetBestCellCandidates(board);
         if (bestSelection.IsNone)
             return 1;
 
@@ -88,11 +92,13 @@ public class ValidBoardGenerator
         var count = 0;
         foreach (var candidate in bestCandidates)
         {
-            bestCell.Value = candidate;
+            var candidateSnapshot = CaptureCandidateSnapshot(board);
+            SetCellValue(board, ruleSet, bestCell, (byte)(candidate + 1));
 
             count += CountSolutions(board, ruleSet, limit - count);
 
-            bestCell.Value = 0;
+            RestoreCandidateSnapshot(board, candidateSnapshot);
+            SetCellValue(board, ruleSet, bestCell, 0);
 
             if (count >= limit)
                 return count;
@@ -113,29 +119,33 @@ public class ValidBoardGenerator
         if (board[row, col].Value != 0)
             return Fill(board, ruleSet, index + 1, rng);
 
-        var candidates = GetCandidates(board, ruleSet, row, col)
-            .OrderBy(_ => rng.Next());
+        ruleSet.ComputeAndFillCandidates(board);
+        var candidates = board[row, col].GetCandidates()
+            .OrderBy(_ => rng.Next())
+            .ToList();
 
-        foreach (byte val in candidates)
+        foreach (byte value in candidates)
         {
-            board[row, col].Value = val;
+            var candidateSnapshot = CaptureCandidateSnapshot(board);
+            SetCellValue(board, ruleSet, board[row, col], (byte)(value + 1));
 
             if (Fill(board, ruleSet, index + 1, rng))
                 return true;
 
-            board[row, col].Value = 0;  // revert
+            RestoreCandidateSnapshot(board, candidateSnapshot);
+            SetCellValue(board, ruleSet, board[row, col], 0);
         }
 
         return false;
     }
 
-    private static Option<(Cell cell, List<byte> candidates)> GetBestCellCandidates(Board board, IRuleSet ruleSet)
+    private static Option<(Cell cell, List<byte> candidates)> GetBestCellCandidates(Board board)
     {
         Option<(Cell cell, List<byte> candidates)> bestSelection = Option<(Cell cell, List<byte> candidates)>.None;
 
-        foreach (var (row, col, cell) in board.EnumerateEmptyCells())
+        foreach (var (_, _, cell) in board.EnumerateEmptyCells())
         {
-            var candidates = GetCandidates(board, ruleSet, row, col).ToList();
+            var candidates = cell.GetCandidates().ToList();
             var candidateCount = candidates.Count;
 
             if (candidateCount == 0)
@@ -155,63 +165,24 @@ public class ValidBoardGenerator
         return bestSelection;
     }
 
-    private static IEnumerable<byte> GetCandidates(
-        Board board,
-        IRuleSet ruleSet,
-        int row,
-        int col)
+    private static void SetCellValue(Board board, IRuleSet ruleSet, Cell cell, byte value)
     {
-        return ruleSet is StandardRuleSet
-            ? GetStandardCandidates(board, row, col)
-            : GetRuleSetCandidates(board, ruleSet, row, col);
+        cell.Value = value;
+        ruleSet.ComputeAndFillCandidates(board);
     }
 
-    private static IEnumerable<byte> GetRuleSetCandidates(Board board, IRuleSet ruleSet, int row, int col)
+    private static ushort[] CaptureCandidateSnapshot(Board board)
     {
-        for (byte i = 1; i <= board.Size; i++)
-        {
-            board[row, col].Value = i;
-
-            if (ruleSet.FindFirstUnsatisfiedConstraint(board).IsNone)
-                yield return i;
-
-            board[row, col].Value = 0;
-        }
+        return board.EnumerateAllCells()
+            .Select(_ => _.cell.GetCandidatesMask())
+            .ToArray();
     }
 
-    private static IEnumerable<byte> GetStandardCandidates(Board board, int row, int col)
+    private static void RestoreCandidateSnapshot(Board board, ushort[] snapshot)
     {
-        var used = new bool[10];
+        int index = 0;
 
-        for (var i = 0; i < board.Size; i++)
-        {
-            var rowValue = board[row, i].Value;
-            if (rowValue != 0)
-                used[rowValue] = true;
-
-            var colValue = board[i, col].Value;
-            if (colValue != 0)
-                used[colValue] = true;
-        }
-
-        var boxSize = (int)Math.Sqrt(board.Size);
-        var boxRowStart = (row / boxSize) * boxSize;
-        var boxColStart = (col / boxSize) * boxSize;
-
-        for (var r = boxRowStart; r < boxRowStart + boxSize; r++)
-        {
-            for (var c = boxColStart; c < boxColStart + boxSize; c++)
-            {
-                var value = board[r, c].Value;
-                if (value != 0)
-                    used[value] = true;
-            }
-        }
-
-        for (byte value = 1; value <= board.Size; value++)
-        {
-            if (!used[value])
-                yield return value;
-        }
+        foreach (var (_, _, cell) in board.EnumerateAllCells())
+            cell.SetCandidates(snapshot[index++]);
     }
 }

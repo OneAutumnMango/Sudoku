@@ -67,6 +67,16 @@ public class Cell
         }
     }
 
+    public ushort GetCandidatesMask()
+    {
+        return _candidates;
+    }
+
+    public void SetCandidates(ushort candidates)
+    {
+        _candidates = candidates;
+    }
+
     public void IntersectCandidates(ushort other)
     {
         _candidates &= other;
