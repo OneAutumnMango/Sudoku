@@ -2,6 +2,7 @@ namespace Sudoku.Core.Generator;
 
 using Sudoku.Core.Grid;
 using Sudoku.Core.RuleSets;
+using Sudoku.Core.Utils;
 
 public class ValidBoardGenerator
 {
@@ -26,6 +27,7 @@ public class ValidBoardGenerator
 
         return board;
     }
+
     public static void Minimise(Board board, IRuleSet ruleSet)
     {
         ArgumentNullException.ThrowIfNull(board);
@@ -36,14 +38,13 @@ public class ValidBoardGenerator
         if (ruleSet.FindFirstUnsatisfiedConstraint(board).IsSome)
             throw new InvalidOperationException("Provided board does not satisfy the rule set.");
 
-        while (GreedyRemoval(board, ruleSet))
-            continue;
+        var rng = Random.Shared;
+        GreedyRemoval(board, ruleSet, rng);
     }
 
-    private static bool GreedyRemoval(Board board, IRuleSet ruleSet)
+    private static bool GreedyRemoval(Board board, IRuleSet ruleSet, Random rng)
     {
         var anyRemoved = false;
-        var rng = Random.Shared;
         var cells = board.EnumerateFilledCells()
             .Select(_ => _.cell)
             .OrderBy(_ => rng.Next())
@@ -76,25 +77,27 @@ public class ValidBoardGenerator
         if (limit <= 0)
             return 0;
 
-        var emptyCells = board.EnumerateEmptyCells();
-        if (!emptyCells.Any())
+        var bestSelection = GetBestCellCandidates(board, ruleSet);
+        if (bestSelection.IsNone)
             return 1;
 
-        var count = 0;
-        var (row, col, cell) =  emptyCells.First();
-        var candidates = GetCandidates(board, ruleSet, row, col);
+        var (bestCell, bestCandidates) = bestSelection.Value;
+        if (bestCandidates.Count == 0)
+            return 0;
 
-        foreach (byte val in candidates)
+        var count = 0;
+        foreach (var candidate in bestCandidates)
         {
-            cell.Value = val;
+            bestCell.Value = candidate;
 
             count += CountSolutions(board, ruleSet, limit - count);
 
-            cell.Value = 0;
+            bestCell.Value = 0;
 
             if (count >= limit)
                 return count;
         }
+
         return count;
     }
 
@@ -126,7 +129,44 @@ public class ValidBoardGenerator
         return false;
     }
 
-    private static IEnumerable<byte> GetCandidates(Board board, IRuleSet ruleSet, int row, int col)
+    private static Option<(Cell cell, List<byte> candidates)> GetBestCellCandidates(Board board, IRuleSet ruleSet)
+    {
+        Option<(Cell cell, List<byte> candidates)> bestSelection = Option<(Cell cell, List<byte> candidates)>.None;
+
+        foreach (var (row, col, cell) in board.EnumerateEmptyCells())
+        {
+            var candidates = GetCandidates(board, ruleSet, row, col).ToList();
+            var candidateCount = candidates.Count;
+
+            if (candidateCount == 0)
+            {
+                return new Option<(Cell cell, List<byte> candidates)>((cell, candidates));
+            }
+
+            if (bestSelection.IsNone || candidateCount < bestSelection.Value.candidates.Count)
+            {
+                bestSelection = new Option<(Cell cell, List<byte> candidates)>((cell, candidates));
+
+                if (candidateCount == 1)
+                    break;
+            }
+        }
+
+        return bestSelection;
+    }
+
+    private static IEnumerable<byte> GetCandidates(
+        Board board,
+        IRuleSet ruleSet,
+        int row,
+        int col)
+    {
+        return ruleSet is StandardRuleSet
+            ? GetStandardCandidates(board, row, col)
+            : GetRuleSetCandidates(board, ruleSet, row, col);
+    }
+
+    private static IEnumerable<byte> GetRuleSetCandidates(Board board, IRuleSet ruleSet, int row, int col)
     {
         for (byte i = 1; i <= board.Size; i++)
         {
@@ -136,6 +176,42 @@ public class ValidBoardGenerator
                 yield return i;
 
             board[row, col].Value = 0;
+        }
+    }
+
+    private static IEnumerable<byte> GetStandardCandidates(Board board, int row, int col)
+    {
+        var used = new bool[10];
+
+        for (var i = 0; i < board.Size; i++)
+        {
+            var rowValue = board[row, i].Value;
+            if (rowValue != 0)
+                used[rowValue] = true;
+
+            var colValue = board[i, col].Value;
+            if (colValue != 0)
+                used[colValue] = true;
+        }
+
+        var boxSize = (int)Math.Sqrt(board.Size);
+        var boxRowStart = (row / boxSize) * boxSize;
+        var boxColStart = (col / boxSize) * boxSize;
+
+        for (var r = boxRowStart; r < boxRowStart + boxSize; r++)
+        {
+            for (var c = boxColStart; c < boxColStart + boxSize; c++)
+            {
+                var value = board[r, c].Value;
+                if (value != 0)
+                    used[value] = true;
+            }
+        }
+
+        for (byte value = 1; value <= board.Size; value++)
+        {
+            if (!used[value])
+                yield return value;
         }
     }
 }

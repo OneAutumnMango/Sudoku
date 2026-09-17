@@ -10,11 +10,13 @@ public sealed class StandardRuleSet : IRuleSet
     {
         ArgumentNullException.ThrowIfNull(board);
 
-        return board.AllGroups
-            .Select(group => new UniqueGroupConstraint(group))
-            .Cast<IConstraint>()
-            .Where(constraint => !constraint.IsSatisfied())
-            .Select(constraint => new Option<IConstraint>(constraint))
-            .FirstOrDefault();
+        foreach (var group in board.AllGroups)
+        {
+            var constraint = new UniqueGroupConstraint(group);
+            if (!constraint.IsSatisfied())
+                return new Option<IConstraint>(constraint);
+        }
+
+        return Option<IConstraint>.None;
     }
 }

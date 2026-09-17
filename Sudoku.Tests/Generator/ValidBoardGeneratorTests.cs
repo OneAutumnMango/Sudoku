@@ -15,7 +15,6 @@ public class ValidBoardGeneratorTests
     public void Generate_ReturnsValidBoard_ForStandardRules()
     {
         Assert.True(standardRuleSet.FindFirstUnsatisfiedConstraint(fixedBoard.Clone()).IsNone);
-        Console.WriteLine(fixedMinimalBoard.Clone());
     }
 
     [Fact]
@@ -59,7 +58,7 @@ public class ValidBoardGeneratorTests
 
         Assert.NotNull(greedyRemoval);
 
-        var result = (bool)greedyRemoval!.Invoke(null, [fixedMinimalBoard.Clone(), standardRuleSet])!;
+        var result = (bool)greedyRemoval!.Invoke(null, [fixedMinimalBoard.Clone(), standardRuleSet, Random.Shared])!;
 
         Assert.False(result);
     }
