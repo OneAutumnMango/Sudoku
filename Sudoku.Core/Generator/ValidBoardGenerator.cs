@@ -53,7 +53,6 @@ public class ValidBoardGenerator
         foreach (var cell in cells)
         {
             var originalValue = cell.Value;
-            var candidateSnapshot = CaptureCandidateSnapshot(board);
             SetCellValue(board, ruleSet, cell, 0);
 
             if (IsUniqueSolution(board, ruleSet))
@@ -62,7 +61,6 @@ public class ValidBoardGenerator
                 continue;
             }
 
-            RestoreCandidateSnapshot(board, candidateSnapshot);
             SetCellValue(board, ruleSet, cell, originalValue);
         }
 
@@ -92,12 +90,10 @@ public class ValidBoardGenerator
         var count = 0;
         foreach (var candidate in bestCandidates)
         {
-            var candidateSnapshot = CaptureCandidateSnapshot(board);
             SetCellValue(board, ruleSet, bestCell, (byte)(candidate + 1));
 
             count += CountSolutions(board, ruleSet, limit - count);
 
-            RestoreCandidateSnapshot(board, candidateSnapshot);
             SetCellValue(board, ruleSet, bestCell, 0);
 
             if (count >= limit)
@@ -126,13 +122,11 @@ public class ValidBoardGenerator
 
         foreach (byte value in candidates)
         {
-            var candidateSnapshot = CaptureCandidateSnapshot(board);
             SetCellValue(board, ruleSet, board[row, col], (byte)(value + 1));
 
             if (Fill(board, ruleSet, index + 1, rng))
                 return true;
 
-            RestoreCandidateSnapshot(board, candidateSnapshot);
             SetCellValue(board, ruleSet, board[row, col], 0);
         }
 
@@ -169,20 +163,5 @@ public class ValidBoardGenerator
     {
         cell.Value = value;
         ruleSet.ComputeAndFillCandidates(board);
-    }
-
-    private static ushort[] CaptureCandidateSnapshot(Board board)
-    {
-        return board.EnumerateAllCells()
-            .Select(_ => _.cell.GetCandidatesMask())
-            .ToArray();
-    }
-
-    private static void RestoreCandidateSnapshot(Board board, ushort[] snapshot)
-    {
-        int index = 0;
-
-        foreach (var (_, _, cell) in board.EnumerateAllCells())
-            cell.SetCandidates(snapshot[index++]);
     }
 }

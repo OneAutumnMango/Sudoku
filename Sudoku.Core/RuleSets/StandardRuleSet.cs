@@ -27,6 +27,12 @@ public sealed class StandardRuleSet : IRuleSet
 
     public void ComputeAndFillCandidates(Board board)
     {
+        foreach (var (_, _, cell) in board.EnumerateAllCells())
+        {
+            if (cell.Value == 0)
+                cell.SetCandidates(Cell.AllCandidates);
+        }
+
         foreach (var constraint in GetConstraints(board))
             constraint.ComputeAndFillCandidates();
     }

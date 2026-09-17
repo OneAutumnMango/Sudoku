@@ -18,6 +18,14 @@ public class ValidBoardGeneratorTests
     }
 
     [Fact]
+    public void GenerateMinimalBoard_DoesNotHave81FilledSquares()
+    {
+        var filledSquares = fixedMinimalBoard.EnumerateFilledCells().Count();
+
+        Assert.True(filledSquares < 81, $"Expected fewer than 81 filled squares, but found {filledSquares}.");
+    }
+
+    [Fact]
     public void Minimise_Throws_WhenBoardContainsEmptyCells()
     {
         var board = new Board(9);
