@@ -2,6 +2,7 @@
 
 public class Cell
 {
+    public static readonly ushort AllCandidates = 0b111111111;  // bitmask of all candidates
     private byte _value;
     public byte Value
     {
@@ -10,12 +11,16 @@ public class Cell
         {
             if (value < 0 || value > 9)
                 throw new ArgumentOutOfRangeException(nameof(value));
+
             _value = value;
+
+            if (value != 0)
+                RemoveCandidate((byte)(value - 1));
         }
     }
 
     public bool IsGiven { get; set; }
-    private ushort _candidates = 0;  // bitmask of candidates
+    private ushort _candidates = AllCandidates;
 
     public Cell()
     {
@@ -60,5 +65,10 @@ public class Cell
             if (HasCandidate(i))
                 yield return i;
         }
+    }
+
+    public void IntersectCandidates(ushort other)
+    {
+        _candidates &= other;
     }
 }

@@ -6,13 +6,13 @@ namespace Sudoku.Tests;
 public class CellTests
 {
     [Fact]
-    public void DefaultCell_HasZeroValue_NoCandidatesSelected()
+    public void DefaultCell_HasZeroValue_AllCandidatesAvailable()
     {
         var cell = new Cell();
 
         Assert.Equal((byte)0, cell.Value);
         Assert.False(cell.IsGiven);
-        Assert.Empty(cell.GetCandidates());
+        Assert.Equal(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 }, cell.GetCandidates().ToArray());
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class CellTests
     }
 
     [Fact]
-    public void AddCandidate_WithMultipleValues_EnumeratesOnlyThoseCandidates()
+    public void RemoveCandidate_RemovesExistingCandidates()
     {
         var cell = new Cell();
 
@@ -45,14 +45,15 @@ public class CellTests
         byte candidate2 = 4;
         byte candidate3 = 8;
 
-        cell.AddCandidate(candidate1);
-        cell.AddCandidate(candidate2);
-        cell.AddCandidate(candidate3);
+        cell.RemoveCandidate(candidate1);
+        cell.RemoveCandidate(candidate2);
+        cell.RemoveCandidate(candidate3);
 
         var candidates = cell.GetCandidates().ToArray();
 
-        Assert.Equal(new[] { candidate1, candidate2, candidate3 }, candidates);
+        Assert.Equal(new byte[] { 0, 2, 3, 5, 6, 7 }, candidates);
     }
+
 
     [Fact]
     public void AddCandidate_WithInvalidValue_ThrowsArgumentOutOfRangeException()

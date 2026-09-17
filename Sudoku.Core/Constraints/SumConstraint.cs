@@ -2,16 +2,10 @@ using Sudoku.Core.Grid;
 
 namespace Sudoku.Core.Constraints;
 
-public class SumConstraint : IConstraint
+public class SumConstraint(IReadOnlyList<Cell> cells, int sum) : IConstraint
 {
-    private readonly IReadOnlyList<Cell> _cells;
-    private readonly int _sum;
-
-    public SumConstraint(IReadOnlyList<Cell> cells, int sum)
-    {
-        _cells = cells;
-        _sum = sum;
-    }
+    private readonly IReadOnlyList<Cell> _cells = cells;
+    private readonly int _sum = sum;
 
     public bool IsSatisfied()
     {
@@ -21,5 +15,10 @@ public class SumConstraint : IConstraint
             sum += cell.Value;
         }
         return sum == _sum;
+    }
+
+    public void ComputeAndFillCandidates()
+    {
+        throw new NotImplementedException();
     }
 }

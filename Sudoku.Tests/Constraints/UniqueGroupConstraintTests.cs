@@ -9,7 +9,7 @@ public class UniqueGroupConstraintTests
     [Fact]
     public void IsSatisfied_WithUniqueValues_ReturnsTrue()
     {
-        int[] values = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        int[] values = [1, 2, 3, 4, 5, 6, 7, 8, 9];
         var cells = new List<Cell>();
 
         foreach (var value in values)
@@ -25,7 +25,7 @@ public class UniqueGroupConstraintTests
     [Fact]
     public void IsSatisfied_WithDuplicateValue_ReturnsFalse()
     {
-        int[] values = { 1, 2, 3, 4, 5, 6, 7, 8, 1 };
+        int[] values = [1, 2, 3, 4, 5, 6, 7, 8, 1];
         var cells = new List<Cell>();
 
         foreach (var value in values)
@@ -41,7 +41,7 @@ public class UniqueGroupConstraintTests
     [Fact]
     public void IsSatisfied_IgnoresZeroValues()
     {
-        int[] values = { 0, 1, 0, 2, 3, 4, 5, 6, 7 };
+        int[] values = [0, 1, 0, 2, 3, 4, 5, 6, 7];
         var cells = new List<Cell>();
 
         foreach (var value in values)
@@ -52,5 +52,54 @@ public class UniqueGroupConstraintTests
         var constraint = new UniqueGroupConstraint(cells);
 
         Assert.True(constraint.IsSatisfied());
+    }
+
+    [Fact]
+    public void ComputeCandidates_RemovesAlreadyUsedDigitsFromEmptyCell()
+    {
+        var cells = new List<Cell>
+        {
+            new(1),
+            new(3),
+            new(5),
+            new(7),
+            new(2),
+            new(4),
+            new(6),
+            new(8),
+            new()
+        };
+
+        var constraint = new UniqueGroupConstraint(cells);
+
+        constraint.ComputeAndFillCandidates();
+
+        Assert.Equal(new byte[] { 8 }, cells[8].GetCandidates().ToArray());
+    }
+
+    [Fact]
+    public void ComputeCandidates_LeavesOnlyRemainingCandidatesForMultipleEmptyCells()
+    {
+        var cells = new List<Cell>
+        {
+            new(1),
+            new(0),
+            new(3),
+            new(0),
+            new(5),
+            new(0),
+            new(7),
+            new(9),
+            new(0)
+        };
+
+        var constraint = new UniqueGroupConstraint(cells);
+
+        constraint.ComputeAndFillCandidates();
+
+        Assert.Equal(new byte[] { 1, 3, 5, 7 }, cells[1].GetCandidates().OrderBy(x => x).ToArray());
+        Assert.Equal(new byte[] { 1, 3, 5, 7 }, cells[3].GetCandidates().OrderBy(x => x).ToArray());
+        Assert.Equal(new byte[] { 1, 3, 5, 7 }, cells[5].GetCandidates().OrderBy(x => x).ToArray());
+        Assert.Equal(new byte[] { 1, 3, 5, 7 }, cells[8].GetCandidates().OrderBy(x => x).ToArray());
     }
 }

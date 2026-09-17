@@ -6,17 +6,28 @@ namespace Sudoku.Core.RuleSets;
 
 public sealed class StandardRuleSet : IRuleSet
 {
-    public Option<IConstraint> FindFirstUnsatisfiedConstraint(Board board)
+    private static IEnumerable<IConstraint> GetConstraints(Board board)
     {
         ArgumentNullException.ThrowIfNull(board);
 
         foreach (var group in board.AllGroups)
+            yield return new UniqueGroupConstraint(group);
+    }
+
+    public Option<IConstraint> FindFirstUnsatisfiedConstraint(Board board)
+    {
+        foreach (var constraint in GetConstraints(board))
         {
-            var constraint = new UniqueGroupConstraint(group);
             if (!constraint.IsSatisfied())
                 return new Option<IConstraint>(constraint);
         }
 
         return Option<IConstraint>.None;
+    }
+
+    public void ComputeAndFillCandidates(Board board)
+    {
+        foreach (var constraint in GetConstraints(board))
+            constraint.ComputeAndFillCandidates();
     }
 }
