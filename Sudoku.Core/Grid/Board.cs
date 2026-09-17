@@ -2,6 +2,8 @@ namespace Sudoku.Core.Grid;
 
 public class Board
 {
+    public int Size { get; }
+
     private readonly Cell[,] _cells;
     private readonly List<Cell[]> _rows = new();
     private readonly List<Cell[]> _columns = new();
@@ -23,9 +25,12 @@ public class Board
 
     public Board(int size)
     {
-        // if (size <= 0) throw new ArgumentException("Size must be positive", nameof(size));
+        if (size <= 0)
+            throw new ArgumentException("Size must be positive", nameof(size));
         if (size != 9)
             throw new ArgumentException("Size must be 9 rn", nameof(size)); // tmp
+
+        Size = size;
         int boxSize = size / 3;
 
         _cells = new Cell[size, size];
@@ -79,8 +84,27 @@ public class Board
 
     public IEnumerable<(int row, int col, Cell cell)> EnumerateAllCells()
     {
-        for (int row = 0; row < 9; row++)
-            for (int col = 0; col < 9; col++)
+        for (int row = 0; row < Size; row++)
+            for (int col = 0; col < Size; col++)
                 yield return (row, col, _cells[row, col]);
+    }
+
+    public override string ToString()
+    {
+        var rows = new List<string>();
+
+        for (int row = 0; row < Size; row++)
+        {
+            var values = new List<string>();
+            for (int col = 0; col < Size; col++)
+            {
+                var value = _cells[row, col].Value;
+                values.Add(value == 0 ? "." : value.ToString());
+            }
+
+            rows.Add(string.Join(" ", values));
+        }
+
+        return string.Join(Environment.NewLine, rows);
     }
 }

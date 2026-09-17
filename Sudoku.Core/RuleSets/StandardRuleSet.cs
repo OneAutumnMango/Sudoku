@@ -4,29 +4,17 @@ using Sudoku.Core.Utils;
 
 namespace Sudoku.Core.RuleSets;
 
-public class StandardRuleSet : IRuleSet
+public sealed class StandardRuleSet : IRuleSet
 {
-    private IReadOnlyList<IConstraint> _constraints = new List<IConstraint>();
-    private bool _isInitialized = false;
-
-    public void Initialize(Board board)
+    public Option<IConstraint> FindFirstUnsatisfiedConstraint(Board board)
     {
-        _constraints = board.AllGroups
+        ArgumentNullException.ThrowIfNull(board);
+
+        return board.AllGroups
             .Select(group => new UniqueGroupConstraint(group))
             .Cast<IConstraint>()
-            .ToList();
-        _isInitialized = true;
-    }
-
-    public Option<IConstraint> FindFirstUnsatisfiedConstraint()
-    {
-        if (!_isInitialized)
-            throw new InvalidOperationException("RuleSet must be initialized before use");
-        
-        foreach (var constraint in _constraints)
-        {
-            if (!constraint.IsSatisfied()) return new Option<IConstraint>(constraint);
-        }
-        return Option<IConstraint>.None;
+            .Where(constraint => !constraint.IsSatisfied())
+            .Select(constraint => new Option<IConstraint>(constraint))
+            .FirstOrDefault();
     }
 }

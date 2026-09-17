@@ -1,4 +1,3 @@
-using Sudoku.Core;
 using Sudoku.Core.Grid;
 using Sudoku.Core.RuleSets;
 
@@ -11,9 +10,8 @@ public class StandardRuleSetTests
     {
         var board = CreateSolvedBoard();
         var ruleSet = new StandardRuleSet();
-        ruleSet.Initialize(board);
 
-        var result = ruleSet.FindFirstUnsatisfiedConstraint();
+        var result = ruleSet.FindFirstUnsatisfiedConstraint(board);
 
         Assert.True(result.IsNone);
     }
@@ -25,9 +23,8 @@ public class StandardRuleSetTests
         board[0, 0].Value = 5;
 
         var ruleSet = new StandardRuleSet();
-        ruleSet.Initialize(board);
 
-        var result = ruleSet.FindFirstUnsatisfiedConstraint();
+        var result = ruleSet.FindFirstUnsatisfiedConstraint(board);
 
         Assert.True(result.IsSome);
     }

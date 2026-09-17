@@ -6,6 +6,5 @@ namespace Sudoku.Core.RuleSets;
 
 public interface IRuleSet
 {
-    public void Initialize(Board board);
-    public Option<IConstraint> FindFirstUnsatisfiedConstraint();
+    public Option<IConstraint> FindFirstUnsatisfiedConstraint(Board board);
 }
