@@ -14,19 +14,31 @@ public class HumanlikeSolver(Puzzle puzzle)
         ISolvingTechnique[] techniques =
         [
             new NakedSingleTechnique(),
-            new HiddenSingleTechnique()
+            new HiddenSingleTechnique(),
+            new NakedPairTechnique(),
+            new HiddenPairTechnique(),
+            new PointingPairTechnique(),
+            new PointingTripleTechnique(),
+            new BoxLineReductionTechnique(),
+            new GuessTechnique()
         ];
 
-        var changed = 1;
-        while (changed > 0)
+        foreach (var difficulty in Enum.GetValues<Difficulty>())
         {
-            changed = 0;
-            foreach (var technique in techniques)
+            if (difficulty == Difficulty.Unknown)
+                continue;
+
+            var changed = 1;
+            while (changed > 0)
             {
-                var applied = technique.TryApply(_puzzle);
-                _techniqueUsageCount[technique] =
-                    _techniqueUsageCount.GetValueOrDefault(technique, 0) + applied;
-                changed += applied;
+                changed = 0;
+                foreach (var technique in techniques.Where(technique => technique.Difficulty <= difficulty))
+                {
+                    var applied = technique.TryApply(_puzzle);
+                    _techniqueUsageCount[technique] =
+                        _techniqueUsageCount.GetValueOrDefault(technique, 0) + applied;
+                    changed += applied;
+                }
             }
         }
     }
