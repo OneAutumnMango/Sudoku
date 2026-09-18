@@ -7,22 +7,26 @@ public sealed class HiddenSingleTechnique : ISolvingTechnique
 {
     public Difficulty Difficulty => Difficulty.Easy;
 
-    public bool TryApply(Puzzle puzzle)
+    public int TryApply(Puzzle puzzle)
     {
         var board = puzzle.Board;
         var ruleset = puzzle.RuleSet;
 
-        ruleset.ComputeAndFillCandidates(board);
-
-        bool applied = false;
+        var changed = 0;
 
         foreach (var constraint in ruleset.GetConstraints(board))
-            applied |= TryFindAndApplyHiddenSingle(constraint);
+        {
+            var constraintChanges = TryFindAndApplyHiddenSingle(puzzle, constraint);
+            if (constraintChanges == 0)
+                continue;
 
-        return applied;
+            changed += constraintChanges;
+        }
+
+        return changed;
     }
 
-    private bool TryFindAndApplyHiddenSingle(IConstraint constraint)
+    private int TryFindAndApplyHiddenSingle(Puzzle puzzle, IConstraint constraint)
     {
         ushort seen = 0b0;
         ushort multiple = 0b0;
@@ -38,7 +42,9 @@ public sealed class HiddenSingleTechnique : ISolvingTechnique
         ushort candidates = (ushort)(seen & ~multiple);
 
         if (candidates == 0)
-            return false;
+            return 0;
+
+        var changed = 0;
 
         foreach (var cell in cells)
         {
@@ -47,11 +53,16 @@ public sealed class HiddenSingleTechnique : ISolvingTechnique
             if (hiddenSingle == 0)
                 continue;
 
-            int bit = BitOperations.TrailingZeroCount(hiddenSingle);
-            cell.Value = (byte)(bit + 1);
+            // safety only has one "1" bit
+            if (!BitOperations.IsPow2((uint)hiddenSingle))
+                continue;
+
+            int bit = BitOperations.TrailingZeroCount((uint)hiddenSingle);
+            if (puzzle.UpdateCell(cell, (byte)(bit + 1)))
+                changed++;
         }
 
-        return true;
+        return changed;
     }
 }
 

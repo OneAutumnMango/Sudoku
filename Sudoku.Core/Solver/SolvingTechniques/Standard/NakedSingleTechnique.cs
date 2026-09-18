@@ -4,25 +4,28 @@ public sealed class NakedSingleTechnique : ISolvingTechnique
 {
     public Difficulty Difficulty => Difficulty.Simple;
 
-    public bool TryApply(Puzzle puzzle)
+    public int TryApply(Puzzle puzzle)
     {
         var board = puzzle.Board;
-        var ruleset = puzzle.RuleSet;
-        var applied = false;
+        var changed = 0;
 
-        ruleset.ComputeAndFillCandidates(board);
-
-        var cells = board.EnumerateEmptyCells()
+        var singles = board.EnumerateEmptyCells()
             .Select(_ => _.cell)
-            .Select(cell => (cell, candidates: cell.GetCandidates()))
-            .Where(cell => cell.candidates.Count() == 1);
+            .Select(cell => (cell, candidate: cell.GetCandidates().ToList()))
+            .Where(item => item.candidate.Count == 1)
+            .ToList();
 
-        foreach (var (cell, candidates) in cells)
+        foreach (var (cell, candidate) in singles)
         {
-            cell.Value = candidates.First();
-            applied = true;
+            // protect against stale candidates
+            var currentCandidates = cell.GetCandidates().ToList();
+            if (currentCandidates.Count != 1)
+                continue;
+
+            if (puzzle.UpdateCell(cell, currentCandidates[0]))
+                changed++;
         }
 
-        return applied;
+        return changed;
     }
 }

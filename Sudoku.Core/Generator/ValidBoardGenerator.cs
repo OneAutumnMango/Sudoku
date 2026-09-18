@@ -86,9 +86,6 @@ public class ValidBoardGenerator
             return 0;
 
         var board = puzzle.Board;
-        var ruleSet = puzzle.RuleSet;
-
-        ruleSet.ComputeAndFillCandidates(board);
 
         var bestSelection = GetBestCellCandidates(board);
         if (bestSelection.IsNone)
@@ -117,7 +114,6 @@ public class ValidBoardGenerator
     private static bool Fill(Puzzle puzzle, int index, Random rng)
     {
         var board = puzzle.Board;
-        var ruleSet = puzzle.RuleSet;
 
         if (index >= board.Size * board.Size)  // geq for safety?
             return true;
@@ -129,7 +125,6 @@ public class ValidBoardGenerator
         if (board[row, col].Value != 0)
             return Fill(puzzle, index + 1, rng);
 
-        ruleSet.ComputeAndFillCandidates(board);
         var candidates = board[row, col].GetCandidates()
             .OrderBy(_ => rng.Next())
             .ToList();
@@ -175,8 +170,6 @@ public class ValidBoardGenerator
 
     private static void SetCellValue(Puzzle puzzle, Cell cell, byte value)
     {
-        cell.Value = value;
-        puzzle.RuleSet
-            .ComputeAndFillCandidates(puzzle.Board);
+        puzzle.UpdateCell(cell, value);
     }
 }

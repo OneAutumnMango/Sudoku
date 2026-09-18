@@ -9,4 +9,5 @@ public interface IRuleSet
     public IEnumerable<IConstraint> GetConstraints(Board board);
     public Option<IConstraint> FindFirstUnsatisfiedConstraint(Board board);
     public void ComputeAndFillCandidates(Board board);
+    public void UpdateCandidates(Board board, Cell changedCell);
 }

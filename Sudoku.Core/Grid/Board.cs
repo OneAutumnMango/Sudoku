@@ -82,6 +82,26 @@ public class Board
         Blocks = _blocks.Select(b => (IReadOnlyList<Cell>)b).ToList();
     }
 
+    public Board(int[,] values) : this(9)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+
+        if (values.GetLength(0) != Size || values.GetLength(1) != Size)
+            throw new ArgumentException($"Values must be a {Size}x{Size} matrix.", nameof(values));
+
+        for (var row = 0; row < Size; row++)
+        {
+            for (var col = 0; col < Size; col++)
+            {
+                var value = values[row, col];
+                if (value < 0 || value > 9)
+                    throw new ArgumentOutOfRangeException(nameof(values), value, "Cell values must be between 0 and 9.");
+
+                _cells[row, col].Value = (byte)value;
+            }
+        }
+    }
+
     public IEnumerable<(int row, int col, Cell cell)> EnumerateAllCells()
     {
         for (int row = 0; row < Size; row++)

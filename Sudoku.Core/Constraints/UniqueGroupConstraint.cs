@@ -22,23 +22,28 @@ public class UniqueGroupConstraint(IReadOnlyList<Cell> cells) : IConstraint
         return true;
     }
 
-    public void ComputeAndFillCandidates()
+    public ushort GetAllowedCandidates(Cell cell)
     {
+        if (!Cells.Contains(cell))
+            throw new ArgumentException("Cell does not belong to this constraint.", nameof(cell));
+
         ushort used = 0;
 
-        foreach (var cell in Cells)
+        foreach (var candidateCell in Cells)
         {
-            if (cell.Value != 0)
-                used |= (ushort)(1 << (cell.Value - 1));
+            if (candidateCell.Value != 0)
+                used |= (ushort)(1 << (candidateCell.Value - 1));
         }
 
-        // candidates for all cells are the same so invert what is already used and apply to each cell
-        ushort candidates = (ushort)(Cell.AllCandidates & ~used);
+        return (ushort)(Cell.AllCandidates & ~used);
+    }
 
+    public void ComputeAndFillCandidates()
+    {
         foreach (var cell in Cells)
         {
             if (cell.Value == 0)
-                cell.IntersectCandidates(candidates);
+                cell.IntersectCandidates(GetAllowedCandidates(cell));
         }
     }
 }

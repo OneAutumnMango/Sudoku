@@ -43,4 +43,24 @@ public class BoardTests
 
         Assert.Contains("1 2 .", text);
     }
+
+    [Fact]
+    public void Constructor_WithValues_LoadsCells()
+    {
+        var values = new int[9, 9];
+        values[0, 0] = 5;
+        values[8, 8] = 9;
+
+        var board = new Board(values);
+
+        Assert.Equal((byte)5, board[0, 0].Value);
+        Assert.Equal((byte)9, board[8, 8].Value);
+        Assert.Equal(2, board.EnumerateFilledCells().Count());
+    }
+
+    [Fact]
+    public void Constructor_WithWrongDimensions_Throws()
+    {
+        Assert.Throws<ArgumentException>(() => new Board(new int[8, 9]));
+    }
 }
