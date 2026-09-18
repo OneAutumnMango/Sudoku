@@ -11,17 +11,16 @@ public class NakedSingleTechniqueTests
     public void TryApply_WhenBoardHasSingleCandidate_ReturnsOneChange()
     {
         var puzzle = new Puzzle(new StandardRuleSet());
-        var board = puzzle.Board;
 
         for (var col = 0; col < 8; col++)
-            board[0, col].Value = (byte)(col + 1);
+            puzzle.SetCell(0, col, (byte)(col + 1));
 
         var technique = new NakedSingleTechnique();
 
         var applied = technique.TryApply(puzzle);
 
         Assert.Equal(1, applied);
-        Assert.Equal((byte)9, board[0, 8].Value);
+        Assert.Equal((byte)9, puzzle.Board[0, 8].Value);
         Assert.Equal(Difficulty.Simple, technique.Difficulty);
     }
 

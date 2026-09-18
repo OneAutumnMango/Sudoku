@@ -7,10 +7,7 @@ public sealed class NakedSingleTechnique : ISolvingTechnique
     public int TryApply(Puzzle puzzle)
     {
         var board = puzzle.Board;
-        var ruleset = puzzle.RuleSet;
         var changed = 0;
-
-        ruleset.ComputeAndFillCandidates(board);
 
         var singles = board.EnumerateEmptyCells()
             .Select(_ => _.cell)
@@ -20,15 +17,13 @@ public sealed class NakedSingleTechnique : ISolvingTechnique
 
         foreach (var (cell, candidate) in singles)
         {
-            ruleset.ComputeAndFillCandidates(board);
-
             // protect against stale candidates
             var currentCandidates = cell.GetCandidates().ToList();
             if (currentCandidates.Count != 1)
                 continue;
 
-            cell.Value = currentCandidates[0];
-            changed++;
+            if (puzzle.UpdateCell(cell, currentCandidates[0]))
+                changed++;
         }
 
         return changed;

@@ -12,24 +12,21 @@ public sealed class HiddenSingleTechnique : ISolvingTechnique
         var board = puzzle.Board;
         var ruleset = puzzle.RuleSet;
 
-        ruleset.ComputeAndFillCandidates(board);
-
         var changed = 0;
 
         foreach (var constraint in ruleset.GetConstraints(board))
         {
-            var constraintChanges = TryFindAndApplyHiddenSingle(constraint);
+            var constraintChanges = TryFindAndApplyHiddenSingle(puzzle, constraint);
             if (constraintChanges == 0)
                 continue;
 
             changed += constraintChanges;
-            ruleset.ComputeAndFillCandidates(board);
         }
 
         return changed;
     }
 
-    private int TryFindAndApplyHiddenSingle(IConstraint constraint)
+    private int TryFindAndApplyHiddenSingle(Puzzle puzzle, IConstraint constraint)
     {
         ushort seen = 0b0;
         ushort multiple = 0b0;
@@ -61,8 +58,8 @@ public sealed class HiddenSingleTechnique : ISolvingTechnique
                 continue;
 
             int bit = BitOperations.TrailingZeroCount((uint)hiddenSingle);
-            cell.Value = (byte)(bit + 1);
-            changed++;
+            if (puzzle.UpdateCell(cell, (byte)(bit + 1)))
+                changed++;
         }
 
         return changed;
