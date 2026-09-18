@@ -4,9 +4,10 @@ public sealed class GuessTechnique : ISolvingTechnique
 {
     public Difficulty Difficulty => Difficulty.Expert;
 
-    public void TryApply(Puzzle puzzle)
+    public bool TryApply(Puzzle puzzle)
     {
         // Intentionally not implemented.
+        return false;
     }
 }
 

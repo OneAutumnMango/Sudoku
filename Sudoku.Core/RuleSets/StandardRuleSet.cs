@@ -6,7 +6,7 @@ namespace Sudoku.Core.RuleSets;
 
 public sealed class StandardRuleSet : IRuleSet
 {
-    private static IEnumerable<IConstraint> GetConstraints(Board board)
+    public IEnumerable<IConstraint> GetConstraints(Board board)
     {
         ArgumentNullException.ThrowIfNull(board);
 
@@ -30,7 +30,7 @@ public sealed class StandardRuleSet : IRuleSet
         foreach (var (_, _, cell) in board.EnumerateAllCells())
         {
             if (cell.Value == 0)
-                cell.SetCandidates(Cell.AllCandidates);
+                cell.Candidates = Cell.AllCandidates;
         }
 
         foreach (var constraint in GetConstraints(board))

@@ -15,12 +15,12 @@ public class Cell
             _value = value;
 
             if (value != 0)
-                RemoveCandidate((byte)(value - 1));
+                RemoveCandidate(value);
         }
     }
 
     public bool IsGiven { get; set; }
-    private ushort _candidates = AllCandidates;
+    public ushort Candidates { get; set; } = AllCandidates;
 
     public Cell()
     {
@@ -36,31 +36,34 @@ public class Cell
 
     private void ValidateCandidate(byte cand)
     {
-        if (cand < 0 || cand > 8)
+        if (cand < 1 || cand > 9)
             throw new ArgumentOutOfRangeException(nameof(cand));
     }
 
     public void AddCandidate(byte cand)
     {
         ValidateCandidate(cand);
-        _candidates |= (ushort)(1 << cand);
+        byte bitIndex = (byte)(cand - 1);
+        Candidates |= (ushort)(1 << bitIndex);
     }
 
     public void RemoveCandidate(byte cand)
     {
         ValidateCandidate(cand);
-        _candidates &= (ushort)~(1 << cand);
+        byte bitIndex = (byte)(cand - 1);
+        Candidates &= (ushort)~(1 << bitIndex);
     }
 
     public bool HasCandidate(byte cand)
     {
         ValidateCandidate(cand);
-        return (_candidates & (ushort)(1 << cand)) != 0;
+        byte bitIndex = (byte)(cand - 1);
+        return (Candidates & (ushort)(1 << bitIndex)) != 0;
     }
 
     public IEnumerable<byte> GetCandidates()
     {
-        for (byte i = 0; i < 9; i++)
+        for (byte i = 1; i <= 9; i++)
         {
             if (HasCandidate(i))
                 yield return i;
@@ -69,16 +72,11 @@ public class Cell
 
     public ushort GetCandidatesMask()
     {
-        return _candidates;
-    }
-
-    public void SetCandidates(ushort candidates)
-    {
-        _candidates = candidates;
+        return Candidates;
     }
 
     public void IntersectCandidates(ushort other)
     {
-        _candidates &= other;
+        Candidates &= other;
     }
 }

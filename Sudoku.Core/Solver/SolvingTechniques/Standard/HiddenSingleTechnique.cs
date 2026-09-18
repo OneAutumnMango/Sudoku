@@ -1,12 +1,57 @@
+using System.Numerics;
+using Sudoku.Core.Constraints;
+
 namespace Sudoku.Core.Solver.SolvingTechniques.Standard;
 
 public sealed class HiddenSingleTechnique : ISolvingTechnique
 {
     public Difficulty Difficulty => Difficulty.Easy;
 
-    public void TryApply(Puzzle puzzle)
+    public bool TryApply(Puzzle puzzle)
     {
-        // Intentionally not implemented.
+        var board = puzzle.Board;
+        var ruleset = puzzle.RuleSet;
+
+        ruleset.ComputeAndFillCandidates(board);
+
+        bool applied = false;
+
+        foreach (var constraint in ruleset.GetConstraints(board))
+            applied |= TryFindAndApplyHiddenSingle(constraint);
+
+        return applied;
+    }
+
+    private bool TryFindAndApplyHiddenSingle(IConstraint constraint)
+    {
+        ushort seen = 0b0;
+        ushort multiple = 0b0;
+
+        var cells = constraint.Cells.Where(cell => cell.Value == 0).ToList();
+
+        foreach (var cell in cells)
+        {
+            multiple |= (ushort)(seen & cell.Candidates);
+            seen |= cell.Candidates;
+        }
+
+        ushort candidates = (ushort)(seen & ~multiple);
+
+        if (candidates == 0)
+            return false;
+
+        foreach (var cell in cells)
+        {
+            ushort hiddenSingle = (ushort)(cell.Candidates & candidates);
+
+            if (hiddenSingle == 0)
+                continue;
+
+            int bit = BitOperations.TrailingZeroCount(hiddenSingle);
+            cell.Value = (byte)(bit + 1);
+        }
+
+        return true;
     }
 }
 

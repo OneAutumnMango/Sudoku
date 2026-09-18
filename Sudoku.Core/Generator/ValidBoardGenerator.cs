@@ -101,7 +101,7 @@ public class ValidBoardGenerator
         var count = 0;
         foreach (var candidate in bestCandidates)
         {
-            SetCellValue(puzzle, bestCell, (byte)(candidate + 1));
+            SetCellValue(puzzle, bestCell, candidate);
 
             count += CountSolutions(puzzle, limit - count);
 
@@ -136,7 +136,7 @@ public class ValidBoardGenerator
 
         foreach (byte value in candidates)
         {
-            SetCellValue(puzzle, board[row, col], (byte)(value + 1));
+            SetCellValue(puzzle, board[row, col], value);
 
             if (Fill(puzzle, index + 1, rng))
                 return true;

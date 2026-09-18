@@ -74,7 +74,7 @@ public class UniqueGroupConstraintTests
 
         constraint.ComputeAndFillCandidates();
 
-        Assert.Equal(new byte[] { 8 }, cells[8].GetCandidates().ToArray());
+        Assert.Equal(new byte[] { 9 }, cells[8].GetCandidates().ToArray());
     }
 
     [Fact]
@@ -97,9 +97,9 @@ public class UniqueGroupConstraintTests
 
         constraint.ComputeAndFillCandidates();
 
-        Assert.Equal(new byte[] { 1, 3, 5, 7 }, cells[1].GetCandidates().OrderBy(x => x).ToArray());
-        Assert.Equal(new byte[] { 1, 3, 5, 7 }, cells[3].GetCandidates().OrderBy(x => x).ToArray());
-        Assert.Equal(new byte[] { 1, 3, 5, 7 }, cells[5].GetCandidates().OrderBy(x => x).ToArray());
-        Assert.Equal(new byte[] { 1, 3, 5, 7 }, cells[8].GetCandidates().OrderBy(x => x).ToArray());
+        Assert.Equal(new byte[] { 2, 4, 6, 8 }, cells[1].GetCandidates().OrderBy(x => x).ToArray());
+        Assert.Equal(new byte[] { 2, 4, 6, 8 }, cells[3].GetCandidates().OrderBy(x => x).ToArray());
+        Assert.Equal(new byte[] { 2, 4, 6, 8 }, cells[5].GetCandidates().OrderBy(x => x).ToArray());
+        Assert.Equal(new byte[] { 2, 4, 6, 8 }, cells[8].GetCandidates().OrderBy(x => x).ToArray());
     }
 }

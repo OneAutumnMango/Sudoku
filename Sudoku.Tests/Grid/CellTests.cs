@@ -12,7 +12,7 @@ public class CellTests
 
         Assert.Equal((byte)0, cell.Value);
         Assert.False(cell.IsGiven);
-        Assert.Equal(new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 }, cell.GetCandidates().ToArray());
+        Assert.Equal(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, cell.GetCandidates().ToArray());
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class CellTests
 
         var candidates = cell.GetCandidates().ToArray();
 
-        Assert.Equal(new byte[] { 0, 2, 3, 5, 6, 7 }, candidates);
+        Assert.Equal(new byte[] { 2, 3, 5, 6, 7, 9 }, candidates);
     }
 
 
@@ -60,7 +60,7 @@ public class CellTests
     {
         var cell = new Cell();
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => cell.AddCandidate(9));
+        Assert.Throws<ArgumentOutOfRangeException>(() => cell.AddCandidate(10));
     }
 
     [Fact]
@@ -68,6 +68,6 @@ public class CellTests
     {
         var cell = new Cell();
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => cell.HasCandidate(9));
+        Assert.Throws<ArgumentOutOfRangeException>(() => cell.HasCandidate(10));
     }
 }

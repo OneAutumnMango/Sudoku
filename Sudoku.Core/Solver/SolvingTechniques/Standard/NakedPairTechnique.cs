@@ -4,9 +4,10 @@ public sealed class NakedPairTechnique : ISolvingTechnique
 {
     public Difficulty Difficulty => Difficulty.Intermediate;
 
-    public void TryApply(Puzzle puzzle)
+    public bool TryApply(Puzzle puzzle)
     {
         // Intentionally not implemented.
+        return false;
     }
 }
 

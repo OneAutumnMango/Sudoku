@@ -4,12 +4,12 @@ namespace Sudoku.Core.Constraints;
 
 public class UniqueGroupConstraint(IReadOnlyList<Cell> cells) : IConstraint
 {
-    private readonly IReadOnlyList<Cell> _cells = cells;
+    public IReadOnlyList<Cell> Cells { get; } = cells;
 
     public bool IsSatisfied()
     {
         var seen = new HashSet<byte>();
-        foreach (var cell in _cells)
+        foreach (var cell in Cells)
         {
             if (cell.Value == 0)
                 continue;
@@ -26,7 +26,7 @@ public class UniqueGroupConstraint(IReadOnlyList<Cell> cells) : IConstraint
     {
         ushort used = 0;
 
-        foreach (var cell in _cells)
+        foreach (var cell in Cells)
         {
             if (cell.Value != 0)
                 used |= (ushort)(1 << (cell.Value - 1));
@@ -35,7 +35,7 @@ public class UniqueGroupConstraint(IReadOnlyList<Cell> cells) : IConstraint
         // candidates for all cells are the same so invert what is already used and apply to each cell
         ushort candidates = (ushort)(Cell.AllCandidates & ~used);
 
-        foreach (var cell in _cells)
+        foreach (var cell in Cells)
         {
             if (cell.Value == 0)
                 cell.IntersectCandidates(candidates);

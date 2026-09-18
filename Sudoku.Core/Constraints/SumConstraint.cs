@@ -4,13 +4,13 @@ namespace Sudoku.Core.Constraints;
 
 public class SumConstraint(IReadOnlyList<Cell> cells, int sum) : IConstraint
 {
-    private readonly IReadOnlyList<Cell> _cells = cells;
+    public IReadOnlyList<Cell> Cells { get; } = cells;
     private readonly int _sum = sum;
 
     public bool IsSatisfied()
     {
         int sum = 0;
-        foreach (var cell in _cells)
+        foreach (var cell in Cells)
         {
             sum += cell.Value;
         }
