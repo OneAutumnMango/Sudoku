@@ -12,14 +12,22 @@ public sealed class NakedSingleTechnique : ISolvingTechnique
 
         ruleset.ComputeAndFillCandidates(board);
 
-        var cells = board.EnumerateEmptyCells()
+        var singles = board.EnumerateEmptyCells()
             .Select(_ => _.cell)
-            .Select(cell => (cell, candidates: cell.GetCandidates()))
-            .Where(cell => cell.candidates.Count() == 1);
+            .Select(cell => (cell, candidate: cell.GetCandidates().ToList()))
+            .Where(item => item.candidate.Count == 1)
+            .ToList();
 
-        foreach (var (cell, candidates) in cells)
+        foreach (var (cell, candidate) in singles)
         {
-            cell.Value = candidates.First();
+            ruleset.ComputeAndFillCandidates(board);
+
+            // protect against stale candidates
+            var currentCandidates = cell.GetCandidates().ToList();
+            if (currentCandidates.Count != 1)
+                continue;
+
+            cell.Value = currentCandidates[0];
             applied = true;
         }
 

@@ -17,7 +17,13 @@ public sealed class HiddenSingleTechnique : ISolvingTechnique
         bool applied = false;
 
         foreach (var constraint in ruleset.GetConstraints(board))
-            applied |= TryFindAndApplyHiddenSingle(constraint);
+        {
+            if (!TryFindAndApplyHiddenSingle(constraint))
+                continue;
+
+            applied = true;
+            ruleset.ComputeAndFillCandidates(board);
+        }
 
         return applied;
     }
@@ -47,7 +53,11 @@ public sealed class HiddenSingleTechnique : ISolvingTechnique
             if (hiddenSingle == 0)
                 continue;
 
-            int bit = BitOperations.TrailingZeroCount(hiddenSingle);
+            // safety only has one "1" bit
+            if (!BitOperations.IsPow2((uint)hiddenSingle))
+                continue;
+
+            int bit = BitOperations.TrailingZeroCount((uint)hiddenSingle);
             cell.Value = (byte)(bit + 1);
         }
 

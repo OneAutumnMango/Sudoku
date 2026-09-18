@@ -26,6 +26,20 @@ public class NakedSingleTechniqueTests
     }
 
     [Fact]
+    public void TryApply_WhenCalledAfterApplyingSingle_ReturnsFalse()
+    {
+        var puzzle = new Puzzle(new StandardRuleSet());
+        for (var col = 0; col < 8; col++)
+            puzzle.SetCell(0, col, (byte)(col + 1));
+
+        var technique = new NakedSingleTechnique();
+
+        Assert.True(technique.TryApply(puzzle));
+        Assert.False(technique.TryApply(puzzle));
+        Assert.Equal((byte)9, puzzle.Board[0, 8].Value);
+    }
+
+    [Fact]
     public void TryApply_WhenBoardHasNoSingleCandidate_ReturnsFalse()
     {
         var puzzle = new Puzzle(new StandardRuleSet());
@@ -35,5 +49,29 @@ public class NakedSingleTechniqueTests
 
         Assert.False(applied);
         Assert.All(puzzle.Board.EnumerateEmptyCells(), cell => Assert.NotEmpty(cell.cell.GetCandidates()));
+    }
+
+    [Fact]
+    public void TryApply_WhenTwoSinglesBecomeConflicting_DoesNotCreateInvalidBoard()
+    {
+        var puzzle = new Puzzle(new StandardRuleSet());
+
+        for (var col = 0; col < 7; col++)
+            puzzle.SetCell(0, col, (byte)(col + 1));
+
+        puzzle.SetCell(3, 7, 8);
+
+        var applied = new NakedSingleTechnique().TryApply(puzzle);
+
+        Assert.True(applied);
+        Assert.Equal((byte)9, puzzle.Board[0, 7].Value);
+        Assert.Equal((byte)0, puzzle.Board[0, 8].Value);
+
+        Assert.True(new NakedSingleTechnique().TryApply(puzzle));
+        Assert.Equal((byte)8, puzzle.Board[0, 8].Value);
+
+        Assert.True(
+            puzzle.RuleSet.FindFirstUnsatisfiedConstraint(puzzle.Board).IsNone,
+            "NakedSingle created an invalid board by assigning conflicting singles from stale candidates.");
     }
 }
