@@ -7,28 +7,29 @@ public sealed class HiddenSingleTechnique : ISolvingTechnique
 {
     public Difficulty Difficulty => Difficulty.Easy;
 
-    public bool TryApply(Puzzle puzzle)
+    public int TryApply(Puzzle puzzle)
     {
         var board = puzzle.Board;
         var ruleset = puzzle.RuleSet;
 
         ruleset.ComputeAndFillCandidates(board);
 
-        bool applied = false;
+        var changed = 0;
 
         foreach (var constraint in ruleset.GetConstraints(board))
         {
-            if (!TryFindAndApplyHiddenSingle(constraint))
+            var constraintChanges = TryFindAndApplyHiddenSingle(constraint);
+            if (constraintChanges == 0)
                 continue;
 
-            applied = true;
+            changed += constraintChanges;
             ruleset.ComputeAndFillCandidates(board);
         }
 
-        return applied;
+        return changed;
     }
 
-    private bool TryFindAndApplyHiddenSingle(IConstraint constraint)
+    private int TryFindAndApplyHiddenSingle(IConstraint constraint)
     {
         ushort seen = 0b0;
         ushort multiple = 0b0;
@@ -44,7 +45,9 @@ public sealed class HiddenSingleTechnique : ISolvingTechnique
         ushort candidates = (ushort)(seen & ~multiple);
 
         if (candidates == 0)
-            return false;
+            return 0;
+
+        var changed = 0;
 
         foreach (var cell in cells)
         {
@@ -59,9 +62,10 @@ public sealed class HiddenSingleTechnique : ISolvingTechnique
 
             int bit = BitOperations.TrailingZeroCount((uint)hiddenSingle);
             cell.Value = (byte)(bit + 1);
+            changed++;
         }
 
-        return true;
+        return changed;
     }
 }
 

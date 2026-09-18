@@ -4,11 +4,11 @@ public sealed class NakedSingleTechnique : ISolvingTechnique
 {
     public Difficulty Difficulty => Difficulty.Simple;
 
-    public bool TryApply(Puzzle puzzle)
+    public int TryApply(Puzzle puzzle)
     {
         var board = puzzle.Board;
         var ruleset = puzzle.RuleSet;
-        var applied = false;
+        var changed = 0;
 
         ruleset.ComputeAndFillCandidates(board);
 
@@ -28,9 +28,9 @@ public sealed class NakedSingleTechnique : ISolvingTechnique
                 continue;
 
             cell.Value = currentCandidates[0];
-            applied = true;
+            changed++;
         }
 
-        return applied;
+        return changed;
     }
 }

@@ -3,10 +3,25 @@ using Sudoku.Core.RuleSets;
 
 namespace Sudoku.Core;
 
-public class Puzzle(IRuleSet ruleset)
+public class Puzzle
 {
-    public IRuleSet RuleSet { get; } = ruleset;
-    public Board Board { get; } = new Board(9);
+    public IRuleSet RuleSet { get; }
+    public Board Board { get; }
+
+    public Puzzle(IRuleSet ruleset)
+    {
+        RuleSet = ruleset;
+        Board = new Board(9);
+    }
+
+    public Puzzle(IRuleSet ruleset, Board board)
+    {
+        RuleSet = ruleset;
+        Board = board;
+    }
+
+    public Puzzle(IRuleSet ruleset, int[,] values): 
+        this(ruleset, new Board(values)) {}
 
     public void SetCell(int row, int col, byte value)
     {

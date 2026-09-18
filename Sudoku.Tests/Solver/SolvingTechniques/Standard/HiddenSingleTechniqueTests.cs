@@ -8,7 +8,7 @@ namespace Sudoku.Tests.Solver.SolvingTechniques.Standard;
 public class HiddenSingleTechniqueTests
 {
     [Fact]
-    public void TryApply_WhenCandidateAppearsOnceInGroup_SetsValueAndReturnsTrue()
+    public void TryApply_WhenCandidateAppearsOnceInGroup_ReturnsOneChange()
     {
         var puzzle = new Puzzle(new StandardRuleSet());
         var board = puzzle.Board;
@@ -20,13 +20,13 @@ public class HiddenSingleTechniqueTests
 
         var applied = technique.TryApply(puzzle);
 
-        Assert.True(applied);
+        Assert.Equal(1, applied);
         Assert.Equal((byte)9, board[0, 8].Value);
         Assert.Equal(Difficulty.Easy, technique.Difficulty);
     }
 
     [Fact]
-    public void TryApply_WhenCalledAfterApplyingSingle_ReturnsFalse()
+    public void TryApply_WhenCalledAfterApplyingSingle_ReturnsZeroChanges()
     {
         var puzzle = new Puzzle(new StandardRuleSet());
         for (var col = 0; col < 8; col++)
@@ -34,26 +34,52 @@ public class HiddenSingleTechniqueTests
 
         var technique = new HiddenSingleTechnique();
 
-        Assert.True(technique.TryApply(puzzle));
-        Assert.False(technique.TryApply(puzzle));
+        Assert.Equal(1, technique.TryApply(puzzle));
+        Assert.Equal(0, technique.TryApply(puzzle));
         Assert.Equal((byte)9, puzzle.Board[0, 8].Value);
     }
 
     [Fact]
-    public void TryApply_WhenNoCandidateIsUniqueInGroup_ReturnsFalse()
+    public void TryApply_WhenNoCandidateIsUniqueInGroup_ReturnsZeroChanges()
     {
         var puzzle = new Puzzle(new StandardRuleSet());
         var technique = new HiddenSingleTechnique();
 
         var applied = technique.TryApply(puzzle);
 
-        Assert.False(applied);
+        Assert.Equal(0, applied);
     }
 
     [Fact]
     public void TryApply_WhenCandidatesChangeBetweenGroups_DoesNotCreateDuplicates()
     {
-        var puzzle = CreatePuzzle(
+        var puzzle = CreateMultipleHiddenSinglePuzzle();
+
+        var applied = new HiddenSingleTechnique().TryApply(puzzle);
+
+        Assert.NotEqual(0, applied);
+        Assert.True(puzzle.RuleSet.FindFirstUnsatisfiedConstraint(puzzle.Board).IsNone);
+    }
+
+    [Fact]
+    public void TryApply_WhenMultipleHiddenSinglesExist_ReturnsNumberOfChangedCells()
+    {
+        var puzzle = CreateMultipleHiddenSinglePuzzle();
+
+        var applied = new HiddenSingleTechnique().TryApply(puzzle);
+
+        Assert.Equal(5, applied);
+        Assert.Equal((byte)2, puzzle.Board[1, 6].Value);
+        Assert.Equal((byte)1, puzzle.Board[3, 5].Value);
+        Assert.Equal((byte)2, puzzle.Board[5, 4].Value);
+        Assert.Equal((byte)2, puzzle.Board[6, 7].Value);
+        Assert.Equal((byte)8, puzzle.Board[8, 4].Value);
+        Assert.True(puzzle.RuleSet.FindFirstUnsatisfiedConstraint(puzzle.Board).IsNone);
+    }
+
+    private static Puzzle CreateMultipleHiddenSinglePuzzle()
+    {
+        return CreatePuzzle(
             new int[,]
             {
                 { 5, 0, 0, 0, 0, 8, 3, 4, 0 },
@@ -66,25 +92,10 @@ public class HiddenSingleTechniqueTests
                 { 0, 0, 8, 0, 0, 2, 0, 0, 4 },
                 { 2, 0, 1, 0, 0, 0, 0, 0, 0 }
             });
-
-        var applied = new HiddenSingleTechnique().TryApply(puzzle);
-
-        Assert.True(applied);
-        Assert.Equal((byte)2, puzzle.Board[1, 6].Value);
-        Assert.Equal((byte)1, puzzle.Board[3, 5].Value);
-        Assert.Equal((byte)2, puzzle.Board[5, 4].Value);
-        Assert.Equal((byte)2, puzzle.Board[6, 7].Value);
-        Assert.True(puzzle.RuleSet.FindFirstUnsatisfiedConstraint(puzzle.Board).IsNone);
     }
 
     private static Puzzle CreatePuzzle(int[,] values)
     {
-        var puzzle = new Puzzle(new StandardRuleSet());
-
-        for (var row = 0; row < values.GetLength(0); row++)
-            for (var col = 0; col < values.GetLength(1); col++)
-                puzzle.SetCell(row, col, (byte)values[row, col]);
-
-        return puzzle;
+        return new Puzzle(new StandardRuleSet(), values);
     }
 }
