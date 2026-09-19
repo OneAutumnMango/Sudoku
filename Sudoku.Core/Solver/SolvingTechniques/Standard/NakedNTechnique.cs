@@ -24,6 +24,7 @@ public sealed class NakedNTechnique : ISolvingTechnique
 
         foreach (var constraint in puzzle.RuleSet.GetConstraints(puzzle.Board))
         {
+            // all empty cells with 2 to N candidates
             var candidates = constraint.Cells
                 .Where(cell => cell.Value == 0)
                 .Where(cell =>
@@ -35,10 +36,12 @@ public sealed class NakedNTechnique : ISolvingTechnique
 
             foreach (var subset in GetCombinations(candidates, _n))
             {
+                // union of candidates in the subset
                 var subsetMask = subset.Aggregate(
                     (ushort)0,
                     (mask, cell) => (ushort)(mask | cell.Candidates));
 
+                // if union count not N
                 if (BitOperations.PopCount(subsetMask) != _n)
                     continue;
 
@@ -47,6 +50,7 @@ public sealed class NakedNTechnique : ISolvingTechnique
                     if (cell.Value != 0 || subset.Contains(cell))
                         continue;
 
+                    // remove union's candidates
                     var before = cell.Candidates;
                     cell.IntersectCandidates((ushort)~subsetMask);
 
