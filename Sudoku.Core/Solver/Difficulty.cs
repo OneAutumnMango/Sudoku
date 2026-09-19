@@ -6,5 +6,6 @@ public enum Difficulty
     Simple,
     Easy,
     Intermediate,
+    Advanced,
     Expert
 }

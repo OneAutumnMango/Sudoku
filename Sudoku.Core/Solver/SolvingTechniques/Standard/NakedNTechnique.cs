@@ -14,13 +14,13 @@ public sealed class NakedNTechnique : ISolvingTechnique
         _n = n;
     }
 
-    public Difficulty Difficulty => Difficulty.Intermediate;
+    public Difficulty Difficulty => Difficulty.Unknown;
 
     public int TryApply(Puzzle puzzle)
     {
         ArgumentNullException.ThrowIfNull(puzzle);
 
-        var changedCells = new HashSet<Cell>();
+        var applied = 0;
 
         foreach (var constraint in puzzle.RuleSet.GetConstraints(puzzle.Board))
         {
@@ -51,12 +51,12 @@ public sealed class NakedNTechnique : ISolvingTechnique
                     cell.IntersectCandidates((ushort)~subsetMask);
 
                     if (cell.Candidates != before)
-                        changedCells.Add(cell);
+                        applied++;
                 }
             }
         }
 
-        return changedCells.Count;
+        return applied;
     }
 
     /**

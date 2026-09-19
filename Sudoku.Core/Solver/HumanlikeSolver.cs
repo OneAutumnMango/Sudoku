@@ -14,12 +14,18 @@ public class HumanlikeSolver(Puzzle puzzle)
         ISolvingTechnique[] techniques =
         [
             new NakedSingleTechnique(),
-            new HiddenSingleTechnique(),
             new NakedPairTechnique(),
+            new NakedTripleTechnique(),
+
+            new HiddenSingleTechnique(),
             new HiddenPairTechnique(),
+
             new PointingPairTechnique(),
             new PointingTripleTechnique(),
+
             new BoxLineReductionTechnique(),
+
+            // x wing, y wing
         ];
 
         foreach (var difficulty in Enum.GetValues<Difficulty>())
