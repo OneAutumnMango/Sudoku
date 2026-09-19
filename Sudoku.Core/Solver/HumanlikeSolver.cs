@@ -20,7 +20,6 @@ public class HumanlikeSolver(Puzzle puzzle)
             new PointingPairTechnique(),
             new PointingTripleTechnique(),
             new BoxLineReductionTechnique(),
-            new GuessTechnique()
         ];
 
         foreach (var difficulty in Enum.GetValues<Difficulty>())
