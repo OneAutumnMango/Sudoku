@@ -141,4 +141,17 @@ public class PuzzleTests
                 + $"expected {reference.Board[row, col].Candidates}, actual {cell.Candidates}.");
         }
     }
+
+    [Fact]
+    public void UpdateCell_DoesNotRestoreCandidatesRemovedByTechnique()
+    {
+        var puzzle = new Puzzle(new StandardRuleSet());
+
+        puzzle.RemoveCandidate(0, 1, 5);
+        puzzle.UpdateCell(0, 0, 4);
+        puzzle.UpdateCell(0, 0, 0);
+        puzzle.RuleSet.ComputeAndFillCandidates(puzzle.Board);
+
+        Assert.DoesNotContain((byte)5, puzzle.Board[0, 1].GetCandidates());
+    }
 }

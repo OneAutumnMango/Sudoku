@@ -65,7 +65,7 @@ public sealed class StandardRuleSet : IRuleSet
         foreach (var (_, _, cell) in board.EnumerateAllCells())
         {
             if (cell.Value == 0)
-                cell.Candidates = Cell.AllCandidates;
+                cell.ResetRuleCandidates();
         }
 
         foreach (var constraint in cache.Constraints)
@@ -87,10 +87,10 @@ public sealed class StandardRuleSet : IRuleSet
 
         foreach (var cell in affectedCells)
         {
-            cell.Candidates = Cell.AllCandidates;
+            cell.ResetRuleCandidates();
 
             foreach (var constraint in cache.ConstraintsByCell[cell])
-                cell.IntersectCandidates(constraint.GetAllowedCandidates(cell));
+                cell.IntersectRuleCandidates(constraint.GetAllowedCandidates(cell));
         }
     }
 }

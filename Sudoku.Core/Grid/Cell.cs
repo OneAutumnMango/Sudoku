@@ -4,6 +4,8 @@ public class Cell
 {
     public static readonly ushort AllCandidates = 0b111111111;  // bitmask of all candidates
     private byte _value;
+    private ushort _ruleCandidates = AllCandidates;
+    private ushort _eliminatedCandidates;
     public byte Value
     {
         get => _value;
@@ -13,14 +15,11 @@ public class Cell
                 throw new ArgumentOutOfRangeException(nameof(value));
 
             _value = value;
-
-            if (value != 0)
-                RemoveCandidate(value);
         }
     }
 
     public bool IsGiven { get; set; }
-    public ushort Candidates { get; set; } = AllCandidates;
+    public ushort Candidates => (ushort)(_ruleCandidates & ~_eliminatedCandidates);
 
     public Cell()
     {
@@ -44,14 +43,14 @@ public class Cell
     {
         ValidateCandidate(cand);
         byte bitIndex = (byte)(cand - 1);
-        Candidates |= (ushort)(1 << bitIndex);
+        _eliminatedCandidates &= (ushort)~(1 << bitIndex);
     }
 
     public void RemoveCandidate(byte cand)
     {
         ValidateCandidate(cand);
         byte bitIndex = (byte)(cand - 1);
-        Candidates &= (ushort)~(1 << bitIndex);
+        _eliminatedCandidates |= (ushort)(1 << bitIndex);
     }
 
     public bool HasCandidate(byte cand)
@@ -77,6 +76,16 @@ public class Cell
 
     public void IntersectCandidates(ushort other)
     {
-        Candidates &= other;
+        _eliminatedCandidates |= (ushort)(AllCandidates & ~other);
+    }
+
+    public void ResetRuleCandidates()
+    {
+        _ruleCandidates = AllCandidates;
+    }
+
+    public void IntersectRuleCandidates(ushort other)
+    {
+        _ruleCandidates &= other;
     }
 }

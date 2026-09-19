@@ -43,7 +43,7 @@ public class UniqueGroupConstraint(IReadOnlyList<Cell> cells) : IConstraint
         foreach (var cell in Cells)
         {
             if (cell.Value == 0)
-                cell.IntersectCandidates(GetAllowedCandidates(cell));
+                cell.IntersectRuleCandidates(GetAllowedCandidates(cell));
         }
     }
 }

@@ -37,7 +37,7 @@ public class Puzzle
         if (cell.Value == value)
             return false;
 
-        cell.Candidates = Cell.AllCandidates;
+        cell.ResetRuleCandidates();
         cell.Value = value;
         RuleSet.UpdateCandidates(Board, cell);
         return true;
