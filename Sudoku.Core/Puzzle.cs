@@ -22,7 +22,7 @@ public class Puzzle
         RuleSet.ComputeAndFillCandidates(Board);
     }
 
-    public Puzzle(IRuleSet ruleset, int[,] values): 
+    public Puzzle(IRuleSet ruleset, int[,] values):
         this(ruleset, new Board(values)) {}
 
     public bool UpdateCell(int row, int col, byte value)
