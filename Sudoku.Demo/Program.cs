@@ -15,11 +15,14 @@ solver.Solve();
 Console.WriteLine("Solved puzzle:");
 Console.WriteLine(puzzle.Board);
 Console.WriteLine();
+
 var valid = puzzle.RuleSet.FindFirstUnsatisfiedConstraint(puzzle.Board).IsNone;
 Console.WriteLine($"Ruleset valid: {valid}");
-Console.WriteLine("Changed cells by difficulty:");
+
+Console.WriteLine("\nTechniques applied by difficulty:");
 foreach (var (difficulty, count) in solver.GetDifficultyUsageCount())
     Console.WriteLine($"{difficulty}: {count}");
-Console.WriteLine("Changed cells by technique:");
+
+Console.WriteLine("\nTechniques applied:");
 foreach (var (technique, count) in solver.GetTechniqueUsageCount())
     Console.WriteLine($"{technique}: {count}");
