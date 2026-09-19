@@ -19,6 +19,7 @@ public class HumanlikeSolver(Puzzle puzzle)
 
             new HiddenSingleTechnique(),
             new HiddenPairTechnique(),
+            new HiddenTripleTechnique(),
 
             new PointingPairTechnique(),
             new PointingTripleTechnique(),
@@ -46,6 +47,14 @@ public class HumanlikeSolver(Puzzle puzzle)
                 }
             }
         }
+    }
+
+    public bool IsSolved()
+    {
+        // check if all cells filled
+        if (_puzzle.Board.EnumerateEmptyCells().Any())
+            return false;
+        return _puzzle.RuleSet.FindFirstUnsatisfiedConstraint(_puzzle.Board).IsNone;
     }
 
     public IReadOnlyDictionary<Difficulty, int> GetDifficultyUsageCount()

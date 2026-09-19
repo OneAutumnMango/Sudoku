@@ -53,13 +53,18 @@ public class Puzzle
         SetCell(row, col, 0b0);
     }
 
-    public void AddCandidate(int row, int col, byte value)
-    {
-        Board[row, col].AddCandidate(value);
-    }
-
     public void RemoveCandidate(int row, int col, byte value)
     {
         Board[row, col].RemoveCandidate(value);
+    }
+
+    public void RemoveCandidate(Cell cell, byte value)
+    {
+        cell.RemoveCandidate(value);
+    }
+
+    public void RemoveCandidates(Cell cell, ushort candidates)
+    {
+        cell.RemoveCandidates(candidates);
     }
 }

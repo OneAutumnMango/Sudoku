@@ -26,17 +26,6 @@ public class CellTests
     }
 
     [Fact]
-    public void AddCandidate_SetsCandidateBit_AndHasCandidateReturnsTrue()
-    {
-        var cell = new Cell();
-
-        byte candidate = 3;
-        cell.AddCandidate(candidate);
-
-        Assert.True(cell.HasCandidate(candidate));
-    }
-
-    [Fact]
     public void RemoveCandidate_RemovesExistingCandidates()
     {
         var cell = new Cell();
@@ -52,15 +41,6 @@ public class CellTests
         var candidates = cell.GetCandidates().ToArray();
 
         Assert.Equal(new byte[] { 2, 3, 5, 6, 7, 9 }, candidates);
-    }
-
-
-    [Fact]
-    public void AddCandidate_WithInvalidValue_ThrowsArgumentOutOfRangeException()
-    {
-        var cell = new Cell();
-
-        Assert.Throws<ArgumentOutOfRangeException>(() => cell.AddCandidate(10));
     }
 
     [Fact]

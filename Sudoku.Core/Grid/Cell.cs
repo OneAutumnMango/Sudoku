@@ -39,18 +39,17 @@ public class Cell
             throw new ArgumentOutOfRangeException(nameof(cand));
     }
 
-    public void AddCandidate(byte cand)
-    {
-        ValidateCandidate(cand);
-        byte bitIndex = (byte)(cand - 1);
-        _eliminatedCandidates &= (ushort)~(1 << bitIndex);
-    }
-
     public void RemoveCandidate(byte cand)
     {
         ValidateCandidate(cand);
         byte bitIndex = (byte)(cand - 1);
         _eliminatedCandidates |= (ushort)(1 << bitIndex);
+    }
+
+    public void RemoveCandidates(ushort cand)
+    {
+        cand &= 0x1FF;  // ensure no cands > 9
+        _eliminatedCandidates |= cand;  // add removed cands
     }
 
     public bool HasCandidate(byte cand)

@@ -1,9 +1,9 @@
 namespace Sudoku.Core.Solver.SolvingTechniques.Standard;
 
-public sealed class HiddenPairTechnique : ISolvingTechnique
+public sealed class HiddenTripleTechnique : ISolvingTechnique
 {
-    public Difficulty Difficulty => Difficulty.Intermediate;
-    private static readonly int _n = 2;
+    public Difficulty Difficulty => Difficulty.Advanced;
+    private static readonly int _n = 3;
     private readonly HiddenNTechnique _hiddenNTechnique = new(_n);
 
     public int TryApply(Puzzle puzzle)
