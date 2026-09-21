@@ -156,4 +156,23 @@ public class Board
 
         return string.Join(Environment.NewLine, rows);
     }
+
+    public string ToCompactString()
+    {
+        var board = "";
+
+        for (int row = 0; row < Size; row++)
+        {
+            var values = new List<string>();
+            for (int col = 0; col < Size; col++)
+            {
+                var value = _cells[row, col].Value;
+                values.Add(value == 0 ? "." : value.ToString());
+            }
+
+            board += string.Join("", values);
+        }
+
+        return board;
+    }
 }

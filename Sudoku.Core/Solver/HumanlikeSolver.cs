@@ -1,5 +1,6 @@
 using Sudoku.Core.Solver.SolvingTechniques;
 using Sudoku.Core.Solver.SolvingTechniques.Standard;
+using Sudoku.Core.Utils;
 
 namespace Sudoku.Core.Solver;
 
@@ -9,7 +10,7 @@ public class HumanlikeSolver(Puzzle puzzle)
 
     private readonly Dictionary<ISolvingTechnique, int> _techniqueUsageCount = [];
 
-    public void Solve()
+    public Option<Difficulty> Solve()
     {
         ISolvingTechnique[] techniques =
         [
@@ -46,6 +47,17 @@ public class HumanlikeSolver(Puzzle puzzle)
                 }
             }
         }
+
+        // puzzle diff is highest difficulty used
+        if (IsSolved())
+            return new Option<Difficulty>(
+                GetDifficultyUsageCount()
+                    .Where(kv => kv.Value > 0)
+                    .MaxBy(kv => kv.Key)
+                    .Key
+            );
+
+        return Option<Difficulty>.None;
     }
 
     public bool IsSolved()
