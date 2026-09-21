@@ -58,6 +58,9 @@ public sealed class StandardRuleSet : IStandardRuleSet
     }
 
     public Board Board { get; }
+    public IReadOnlyList<IConstraint> RowConstraints => _cache.RowConstraints;
+    public IReadOnlyList<IConstraint> ColumnConstraints => _cache.ColumnConstraints;
+    public IReadOnlyList<IConstraint> BoxConstraints => _cache.BoxConstraints;
 
     public IEnumerable<IConstraint> GetConstraints()
     {

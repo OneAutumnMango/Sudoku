@@ -21,8 +21,7 @@ public class HumanlikeSolver(Puzzle puzzle)
             new HiddenPairTechnique(),
             new HiddenTripleTechnique(),
 
-            new PointingPairTechnique(),
-            new PointingTripleTechnique(),
+            new PointingTechnique(),
 
             new BoxLineReductionTechnique(),
 

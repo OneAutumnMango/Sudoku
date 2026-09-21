@@ -2,7 +2,7 @@ namespace Sudoku.Core.Solver.SolvingTechniques.Standard;
 
 using Sudoku.Core.RuleSets;
 
-public sealed class BoxLineReductionTechnique : ISolvingTechnique
+public sealed class PointingTechnique : ISolvingTechnique
 {
     public Difficulty Difficulty => Difficulty.Intermediate;
 
@@ -12,15 +12,14 @@ public sealed class BoxLineReductionTechnique : ISolvingTechnique
 
         if (puzzle.RuleSet is not IStandardRuleSet standardRuleSet)
             throw new ArgumentException(
-                "Box-line reduction requires standard Sudoku rules.",
+                "Pointing technique requires standard Sudoku rules.",
                 nameof(puzzle));
 
         var rows = standardRuleSet.RowConstraints;
         var cols = standardRuleSet.ColumnConstraints;
         var boxes = standardRuleSet.BoxConstraints;
 
-        return new GroupIntersectionTechnique(rows.Concat(cols), boxes)
+        return new GroupIntersectionTechnique(boxes, rows.Concat(cols))
             .TryApply(puzzle);
     }
 }
-

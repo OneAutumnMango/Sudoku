@@ -15,6 +15,9 @@ public interface IRuleSet
 
 public interface IStandardRuleSet : IRuleSet
 {
+    public IReadOnlyList<IConstraint> RowConstraints { get; }
+    public IReadOnlyList<IConstraint> ColumnConstraints { get; }
+    public IReadOnlyList<IConstraint> BoxConstraints { get; }
     public IConstraint GetContainingRow(Cell cell);
     public IConstraint GetContainingColumn(Cell cell);
     public IConstraint GetContainingBox(Cell cell);
