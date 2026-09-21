@@ -97,7 +97,7 @@ public class NakedSingleTechniqueTests
         Assert.Equal((byte)8, puzzle.Board[0, 8].Value);
 
         Assert.True(
-            puzzle.RuleSet.FindFirstUnsatisfiedConstraint(puzzle.Board).IsNone,
+            puzzle.RuleSet.FindFirstUnsatisfiedConstraint().IsNone,
             "NakedSingle created an invalid board by assigning conflicting singles from stale candidates.");
     }
 

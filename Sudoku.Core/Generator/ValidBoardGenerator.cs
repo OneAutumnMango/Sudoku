@@ -38,7 +38,7 @@ public class ValidBoardGenerator
 
         if (board.EnumerateEmptyCells().Any())
             throw new InvalidOperationException("Provided board contains empty cells.");
-        if (ruleSet.FindFirstUnsatisfiedConstraint(board).IsSome)
+        if (ruleSet.FindFirstUnsatisfiedConstraint().IsSome)
             throw new InvalidOperationException("Provided board does not satisfy the rule set.");
 
         var rng = Random.Shared;

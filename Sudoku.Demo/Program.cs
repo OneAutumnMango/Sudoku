@@ -16,7 +16,7 @@ using Sudoku.Core.Solver;
 // Console.WriteLine(puzzle.Board);
 // Console.WriteLine();
 
-// var valid = puzzle.RuleSet.FindFirstUnsatisfiedConstraint(puzzle.Board).IsNone;
+// var valid = puzzle.RuleSet.FindFirstUnsatisfiedConstraint().IsNone;
 // Console.WriteLine($"Ruleset valid: {valid}");
 
 // Console.WriteLine("\nTechniques applied by difficulty:");
@@ -43,7 +43,7 @@ void findEpicAlert()
 
         var s = new HumanlikeSolver(p);
         s.Solve();
-        if (!p.RuleSet.FindFirstUnsatisfiedConstraint(p.Board).IsNone)
+        if (!p.RuleSet.FindFirstUnsatisfiedConstraint().IsNone)
             Console.WriteLine("Generated puzzle is invalid!!!!!!!!!!!!!!");
 
         Console.WriteLine(p.Board);

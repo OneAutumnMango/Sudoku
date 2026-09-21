@@ -4,52 +4,95 @@ using Sudoku.Core.Utils;
 
 namespace Sudoku.Core.RuleSets;
 
-public sealed class StandardRuleSet : IRuleSet
+public sealed class StandardRuleSet : IStandardRuleSet
 {
     private sealed class ConstraintCache
     {
         public required IReadOnlyList<IConstraint> Constraints { get; init; }
+        public required IReadOnlyList<IConstraint> RowConstraints { get; init; }
+        public required IReadOnlyList<IConstraint> ColumnConstraints { get; init; }
+        public required IReadOnlyList<IConstraint> BoxConstraints { get; init; }
         public required IReadOnlyDictionary<Cell, IReadOnlyList<IConstraint>> ConstraintsByCell { get; init; }
     }
 
-    private readonly Dictionary<Board, ConstraintCache> _cacheByBoard = [];
+    private readonly ConstraintCache _cache;
 
-    public IEnumerable<IConstraint> GetConstraints(Board board)
+    public StandardRuleSet() : this(new Board(9))
+    {
+    }
+
+    public StandardRuleSet(Board board)
     {
         ArgumentNullException.ThrowIfNull(board);
+        Board = board;
 
-        return GetCache(board).Constraints;
-    }
+        var rowConstraints = board.Rows
+            .Select(group => (IConstraint)new UniqueGroupConstraint(group))
+            .ToList();
+        var columnConstraints = board.Columns
+            .Select(group => (IConstraint)new UniqueGroupConstraint(group))
+            .ToList();
+        var boxConstraints = board.Blocks
+            .Select(group => (IConstraint)new UniqueGroupConstraint(group))
+            .ToList();
+        var constraints = rowConstraints
+            .Concat(columnConstraints)
+            .Concat(boxConstraints)
+            .ToList();
 
-    private ConstraintCache GetCache(Board board)
-    {
-        if (!_cacheByBoard.TryGetValue(board, out var cache))
+        var constraintsByCell = board.EnumerateAllCells()
+            .ToDictionary(
+                item => item.cell,
+                item => (IReadOnlyList<IConstraint>)constraints
+                    .Where(constraint => constraint.Cells.Contains(item.cell))
+                    .ToList());
+
+        _cache = new ConstraintCache
         {
-            var constraints = board.AllGroups
-                .Select(group => (IConstraint)new UniqueGroupConstraint(group))
-                .ToList();
-
-            var constraintsByCell = board.EnumerateAllCells()
-                .ToDictionary(
-                    item => item.cell,
-                    item => (IReadOnlyList<IConstraint>)constraints
-                        .Where(constraint => constraint.Cells.Contains(item.cell))
-                        .ToList());
-
-            cache = new ConstraintCache
-            {
-                Constraints = constraints,
-                ConstraintsByCell = constraintsByCell
-            };
-            _cacheByBoard[board] = cache;
-        }
-
-        return cache;
+            Constraints = constraints,
+            RowConstraints = rowConstraints,
+            ColumnConstraints = columnConstraints,
+            BoxConstraints = boxConstraints,
+            ConstraintsByCell = constraintsByCell
+        };
     }
 
-    public Option<IConstraint> FindFirstUnsatisfiedConstraint(Board board)
+    public Board Board { get; }
+
+    public IEnumerable<IConstraint> GetConstraints()
     {
-        foreach (var constraint in GetConstraints(board))
+        return _cache.Constraints;
+    }
+
+    public IConstraint GetContainingRow(Cell cell)
+    {
+        return GetContainingConstraint(_cache.RowConstraints, cell, nameof(cell));
+    }
+
+    public IConstraint GetContainingColumn(Cell cell)
+    {
+        return GetContainingConstraint(_cache.ColumnConstraints, cell, nameof(cell));
+    }
+
+    public IConstraint GetContainingBox(Cell cell)
+    {
+        return GetContainingConstraint(_cache.BoxConstraints, cell, nameof(cell));
+    }
+
+    private static IConstraint GetContainingConstraint(
+        IReadOnlyList<IConstraint> constraints,
+        Cell cell,
+        string parameterName)
+    {
+        ArgumentNullException.ThrowIfNull(cell, parameterName);
+
+        var constraint = constraints.FirstOrDefault(constraint => constraint.Cells.Contains(cell));
+        return constraint ?? throw new ArgumentException("Cell does not belong to this board.", parameterName);
+    }
+
+    public Option<IConstraint> FindFirstUnsatisfiedConstraint()
+    {
+        foreach (var constraint in GetConstraints())
         {
             if (!constraint.IsSatisfied())
                 return new Option<IConstraint>(constraint);
@@ -58,27 +101,23 @@ public sealed class StandardRuleSet : IRuleSet
         return Option<IConstraint>.None;
     }
 
-    public void ComputeAndFillCandidates(Board board)
+    public void ComputeAndFillCandidates()
     {
-        var cache = GetCache(board);
-
-        foreach (var (_, _, cell) in board.EnumerateAllCells())
+        foreach (var (_, _, cell) in Board.EnumerateAllCells())
         {
             if (cell.Value == 0)
                 cell.ResetRuleCandidates();
         }
 
-        foreach (var constraint in cache.Constraints)
+        foreach (var constraint in _cache.Constraints)
             constraint.ComputeAndFillCandidates();
     }
 
-    public void UpdateCandidates(Board board, Cell changedCell)
+    public void UpdateCandidates(Cell changedCell)
     {
-        ArgumentNullException.ThrowIfNull(board);
         ArgumentNullException.ThrowIfNull(changedCell);
 
-        var cache = GetCache(board);
-        var affectedConstraints = cache.ConstraintsByCell[changedCell];
+        var affectedConstraints = _cache.ConstraintsByCell[changedCell];
         var affectedCells = affectedConstraints
             .SelectMany(constraint => constraint.Cells)
             .Where(cell => cell.Value == 0)
@@ -89,7 +128,7 @@ public sealed class StandardRuleSet : IRuleSet
         {
             cell.ResetRuleCandidates();
 
-            foreach (var constraint in cache.ConstraintsByCell[cell])
+            foreach (var constraint in _cache.ConstraintsByCell[cell])
                 cell.IntersectRuleCandidates(constraint.GetAllowedCandidates(cell));
         }
     }

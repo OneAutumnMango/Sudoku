@@ -22,7 +22,7 @@ public sealed class HiddenNTechnique : ISolvingTechnique
 
         var applied = 0;
 
-        foreach (var constraint in puzzle.RuleSet.GetConstraints(puzzle.Board))
+        foreach (var constraint in puzzle.RuleSet.GetConstraints())
         {
             // all empty cells with 2+ candidates
             var candidates = constraint.Cells

@@ -6,8 +6,16 @@ namespace Sudoku.Core.RuleSets;
 
 public interface IRuleSet
 {
-    public IEnumerable<IConstraint> GetConstraints(Board board);
-    public Option<IConstraint> FindFirstUnsatisfiedConstraint(Board board);
-    public void ComputeAndFillCandidates(Board board);
-    public void UpdateCandidates(Board board, Cell changedCell);
+    public Board Board { get; }
+    public IEnumerable<IConstraint> GetConstraints();
+    public Option<IConstraint> FindFirstUnsatisfiedConstraint();
+    public void ComputeAndFillCandidates();
+    public void UpdateCandidates(Cell changedCell);
+}
+
+public interface IStandardRuleSet : IRuleSet
+{
+    public IConstraint GetContainingRow(Cell cell);
+    public IConstraint GetContainingColumn(Cell cell);
+    public IConstraint GetContainingBox(Cell cell);
 }

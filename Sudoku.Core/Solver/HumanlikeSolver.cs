@@ -54,7 +54,7 @@ public class HumanlikeSolver(Puzzle puzzle)
         // check if all cells filled
         if (_puzzle.Board.EnumerateEmptyCells().Any())
             return false;
-        return _puzzle.RuleSet.FindFirstUnsatisfiedConstraint(_puzzle.Board).IsNone;
+        return _puzzle.RuleSet.FindFirstUnsatisfiedConstraint().IsNone;
     }
 
     public IReadOnlyDictionary<Difficulty, int> GetDifficultyUsageCount()

@@ -12,7 +12,7 @@ public class PuzzleTests
         var values = new int[9, 9];
         values[0, 0] = 5;
         values[8, 8] = 9;
-        var ruleset = new StandardRuleSet();
+        var ruleset = new StandardRuleSet(new Board(9));
 
         var puzzle = new Puzzle(ruleset, values);
 
@@ -57,8 +57,8 @@ public class PuzzleTests
     {
         var puzzle = new Puzzle(new StandardRuleSet());
 
-        var first = puzzle.RuleSet.GetConstraints(puzzle.Board).ToList();
-        var second = puzzle.RuleSet.GetConstraints(puzzle.Board).ToList();
+        var first = puzzle.RuleSet.GetConstraints().ToList();
+        var second = puzzle.RuleSet.GetConstraints().ToList();
 
         Assert.Equal(first.Count, second.Count);
         Assert.All(first.Zip(second), pair => Assert.Same(pair.First, pair.Second));
@@ -103,7 +103,7 @@ public class PuzzleTests
         var beforeRebuild = puzzle.Board.EnumerateAllCells()
             .ToDictionary(item => (item.row, item.col), item => item.cell.Candidates);
 
-        puzzle.RuleSet.ComputeAndFillCandidates(puzzle.Board);
+        puzzle.RuleSet.ComputeAndFillCandidates();
 
         foreach (var (row, col, cell) in puzzle.Board.EnumerateAllCells())
             Assert.Equal(beforeRebuild[(row, col)], cell.Candidates);
@@ -150,7 +150,7 @@ public class PuzzleTests
         puzzle.RemoveCandidate(0, 1, 5);
         puzzle.UpdateCell(0, 0, 4);
         puzzle.UpdateCell(0, 0, 0);
-        puzzle.RuleSet.ComputeAndFillCandidates(puzzle.Board);
+        puzzle.RuleSet.ComputeAndFillCandidates();
 
         Assert.DoesNotContain((byte)5, puzzle.Board[0, 1].GetCandidates());
     }

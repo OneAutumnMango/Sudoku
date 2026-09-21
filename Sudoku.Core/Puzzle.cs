@@ -6,24 +6,31 @@ namespace Sudoku.Core;
 public class Puzzle
 {
     public IRuleSet RuleSet { get; }
-    public Board Board { get; }
+    public Board Board => RuleSet.Board;
 
     public Puzzle(IRuleSet ruleset)
     {
+        ArgumentNullException.ThrowIfNull(ruleset);
         RuleSet = ruleset;
-        Board = new Board(9);
-        RuleSet.ComputeAndFillCandidates(Board);
-    }
-
-    public Puzzle(IRuleSet ruleset, Board board)
-    {
-        RuleSet = ruleset;
-        Board = board;
-        RuleSet.ComputeAndFillCandidates(Board);
+        RuleSet.ComputeAndFillCandidates();
     }
 
     public Puzzle(IRuleSet ruleset, int[,] values):
-        this(ruleset, new Board(values)) {}
+        this(ruleset)
+    {
+        ArgumentNullException.ThrowIfNull(values);
+
+        if (values.GetLength(0) != Board.Size || values.GetLength(1) != Board.Size)
+            throw new ArgumentException($"Values must be a {Board.Size}x{Board.Size} matrix.", nameof(values));
+
+        for (var row = 0; row < Board.Size; row++)
+        {
+            for (var col = 0; col < Board.Size; col++)
+                Board[row, col].Value = (byte)values[row, col];
+        }
+
+        RuleSet.ComputeAndFillCandidates();
+    }
 
     public bool UpdateCell(int row, int col, byte value)
     {
@@ -39,7 +46,7 @@ public class Puzzle
 
         cell.ResetRuleCandidates();
         cell.Value = value;
-        RuleSet.UpdateCandidates(Board, cell);
+        RuleSet.UpdateCandidates(cell);
         return true;
     }
 

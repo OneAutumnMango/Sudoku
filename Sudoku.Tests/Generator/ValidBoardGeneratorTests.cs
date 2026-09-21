@@ -13,7 +13,7 @@ public class ValidBoardGeneratorTests
     {
         var fixedPuzzle = ValidBoardGenerator.Generate(new Puzzle(new StandardRuleSet()));
 
-        Assert.True(new StandardRuleSet().FindFirstUnsatisfiedConstraint(fixedPuzzle.Board.Clone()).IsNone);
+        Assert.True(new StandardRuleSet(fixedPuzzle.Board).FindFirstUnsatisfiedConstraint().IsNone);
     }
 
     [Fact]
