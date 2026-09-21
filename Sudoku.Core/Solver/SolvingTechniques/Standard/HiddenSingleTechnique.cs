@@ -4,7 +4,7 @@ public sealed class HiddenSingleTechnique : ISolvingTechnique
 {
     private readonly HiddenNTechnique _hiddenNTechnique = new(1);
 
-    public Difficulty Difficulty => Difficulty.Easy;
+    public Difficulty Difficulty => Difficulty.Simple;
 
     public int TryApply(Puzzle puzzle)
     {
