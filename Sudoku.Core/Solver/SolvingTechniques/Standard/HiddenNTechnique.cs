@@ -9,7 +9,7 @@ public sealed class HiddenNTechnique : ISolvingTechnique
 
     public HiddenNTechnique(int n)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(n, 2);
+        ArgumentOutOfRangeException.ThrowIfLessThan(n, 1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(n, 4);
         _n = n;
     }
@@ -27,7 +27,7 @@ public sealed class HiddenNTechnique : ISolvingTechnique
             // all empty cells with 2+ candidates
             var candidates = constraint.Cells
                 .Where(cell => cell.Value == 0)
-                .Where(cell => BitOperations.PopCount(cell.Candidates) > 1)  // removing this would work for N=1 too i think but then naked single would be applying the change
+                .Where(cell => BitOperations.PopCount(cell.Candidates) > 1)
                 .ToList();
 
             foreach (var subset in GetCombinations(candidates, _n))

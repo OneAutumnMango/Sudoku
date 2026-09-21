@@ -11,9 +11,9 @@ public class NakedNTechniqueTests
     {
         var puzzle = new Puzzle(new StandardRuleSet());
 
-        KeepCandidates(puzzle.Board[0, 0], 1, 2);
-        KeepCandidates(puzzle.Board[0, 1], 1, 2);
-        KeepCandidates(puzzle.Board[0, 2], 1, 2, 3);
+        SetCandidates(puzzle.Board[0, 0], 1, 2);
+        SetCandidates(puzzle.Board[0, 1], 1, 2);
+        SetCandidates(puzzle.Board[0, 2], 1, 2, 3);
 
         var changed = new NakedNTechnique(2).TryApply(puzzle);
 
@@ -28,10 +28,10 @@ public class NakedNTechniqueTests
     {
         var puzzle = new Puzzle(new StandardRuleSet());
 
-        KeepCandidates(puzzle.Board[0, 0], 1, 2);
-        KeepCandidates(puzzle.Board[0, 1], 1, 3);
-        KeepCandidates(puzzle.Board[0, 2], 2, 3);
-        KeepCandidates(puzzle.Board[0, 3], 1, 2, 3, 4);
+        SetCandidates(puzzle.Board[0, 0], 1, 2);
+        SetCandidates(puzzle.Board[0, 1], 1, 3);
+        SetCandidates(puzzle.Board[0, 2], 2, 3);
+        SetCandidates(puzzle.Board[0, 3], 1, 2, 3, 4);
 
         var changed = new NakedNTechnique(3).TryApply(puzzle);
 
@@ -44,11 +44,11 @@ public class NakedNTechniqueTests
     {
         var puzzle = new Puzzle(new StandardRuleSet());
 
-        KeepCandidates(puzzle.Board[0, 0], 1, 2);
-        KeepCandidates(puzzle.Board[0, 1], 1, 3);
-        KeepCandidates(puzzle.Board[0, 2], 2, 4);
-        KeepCandidates(puzzle.Board[0, 3], 3, 4);
-        KeepCandidates(puzzle.Board[0, 4], 1, 2, 3, 4, 5);
+        SetCandidates(puzzle.Board[0, 0], 1, 2);
+        SetCandidates(puzzle.Board[0, 1], 1, 3);
+        SetCandidates(puzzle.Board[0, 2], 2, 4);
+        SetCandidates(puzzle.Board[0, 3], 3, 4);
+        SetCandidates(puzzle.Board[0, 4], 1, 2, 3, 4, 5);
 
         var changed = new NakedNTechnique(4).TryApply(puzzle);
 
@@ -61,8 +61,8 @@ public class NakedNTechniqueTests
     {
         var puzzle = new Puzzle(new StandardRuleSet());
 
-        KeepCandidates(puzzle.Board[0, 0], 1, 2);
-        KeepCandidates(puzzle.Board[0, 1], 1, 3);
+        SetCandidates(puzzle.Board[0, 0], 1, 2);
+        SetCandidates(puzzle.Board[0, 1], 1, 3);
 
         Assert.Equal(0, new NakedNTechnique(2).TryApply(puzzle));
     }
@@ -81,9 +81,9 @@ public class NakedNTechniqueTests
     {
         var puzzle = new Puzzle(new StandardRuleSet());
 
-        KeepCandidates(puzzle.Board[0, 0], 1, 2);
-        KeepCandidates(puzzle.Board[0, 1], 1, 2);
-        KeepCandidates(puzzle.Board[0, 2], 1, 2, 3);
+        SetCandidates(puzzle.Board[0, 0], 1, 2);
+        SetCandidates(puzzle.Board[0, 1], 1, 2);
+        SetCandidates(puzzle.Board[0, 2], 1, 2, 3);
 
         var changed = new NakedPairTechnique().TryApply(puzzle);
 
@@ -91,7 +91,7 @@ public class NakedNTechniqueTests
         Assert.Equal(new byte[] { 3 }, puzzle.Board[0, 2].GetCandidates());
     }
 
-    private static void KeepCandidates(Sudoku.Core.Grid.Cell cell, params byte[] candidates)
+    private static void SetCandidates(Sudoku.Core.Grid.Cell cell, params byte[] candidates)
     {
         for (byte candidate = 1; candidate <= 9; candidate++)
         {

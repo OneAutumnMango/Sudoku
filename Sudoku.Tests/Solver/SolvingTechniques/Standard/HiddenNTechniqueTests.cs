@@ -12,10 +12,10 @@ public class HiddenNTechniqueTests
     {
         var puzzle = new Puzzle(new StandardRuleSet());
 
-        KeepCandidates(puzzle.Board[0, 0], 1, 2, 3);
-        KeepCandidates(puzzle.Board[0, 1], 1, 2, 4);
+        SetCandidates(puzzle.Board[0, 0], 1, 2, 3);
+        SetCandidates(puzzle.Board[0, 1], 1, 2, 4);
         for (var col = 2; col < 9; col++)
-            KeepCandidates(puzzle.Board[0, col], 3, 4, 5, 6, 7, 8, 9);
+            SetCandidates(puzzle.Board[0, col], 3, 4, 5, 6, 7, 8, 9);
 
         var changed = new HiddenNTechnique(2).TryApply(puzzle);
 
@@ -29,11 +29,11 @@ public class HiddenNTechniqueTests
     {
         var puzzle = new Puzzle(new StandardRuleSet());
 
-        KeepCandidates(puzzle.Board[0, 0], 1, 2, 4);
-        KeepCandidates(puzzle.Board[0, 1], 1, 3, 5);
-        KeepCandidates(puzzle.Board[0, 2], 2, 3, 6);
+        SetCandidates(puzzle.Board[0, 0], 1, 2, 4);
+        SetCandidates(puzzle.Board[0, 1], 1, 3, 5);
+        SetCandidates(puzzle.Board[0, 2], 2, 3, 6);
         for (var col = 3; col < 9; col++)
-            KeepCandidates(puzzle.Board[0, col], 4, 5, 6, 7, 8, 9);
+            SetCandidates(puzzle.Board[0, col], 4, 5, 6, 7, 8, 9);
 
         var changed = new HiddenNTechnique(3).TryApply(puzzle);
 
@@ -48,12 +48,12 @@ public class HiddenNTechniqueTests
     {
         var puzzle = new Puzzle(new StandardRuleSet());
 
-        KeepCandidates(puzzle.Board[0, 0], 1, 2, 5);
-        KeepCandidates(puzzle.Board[0, 1], 1, 3, 6);
-        KeepCandidates(puzzle.Board[0, 2], 2, 4, 7);
-        KeepCandidates(puzzle.Board[0, 3], 3, 4, 8);
+        SetCandidates(puzzle.Board[0, 0], 1, 2, 5);
+        SetCandidates(puzzle.Board[0, 1], 1, 3, 6);
+        SetCandidates(puzzle.Board[0, 2], 2, 4, 7);
+        SetCandidates(puzzle.Board[0, 3], 3, 4, 8);
         for (var col = 4; col < 9; col++)
-            KeepCandidates(puzzle.Board[0, col], 5, 6, 7, 8, 9);
+            SetCandidates(puzzle.Board[0, col], 5, 6, 7, 8, 9);
 
         var changed = new HiddenNTechnique(4).TryApply(puzzle);
 
@@ -74,14 +74,13 @@ public class HiddenNTechniqueTests
 
     [Theory]
     [InlineData(0)]
-    [InlineData(1)]
     [InlineData(5)]
     public void Constructor_WhenNIsOutsideSupportedRange_Throws(int n)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new HiddenNTechnique(n));
     }
 
-    private static void KeepCandidates(Cell cell, params byte[] candidates)
+    private static void SetCandidates(Cell cell, params byte[] candidates)
     {
         for (byte candidate = 1; candidate <= 9; candidate++)
         {
