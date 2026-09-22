@@ -6,7 +6,7 @@ namespace Sudoku.Core.Solver.SolvingTechniques.Standard;
 
 public class FishTechnique(int n) : ISolvingTechnique
 {
-    public Difficulty Difficulty { get; } = Difficulty.Advanced;
+    public Difficulty Difficulty { get; } = Difficulty.Unknown;
     private readonly int _n = n;
 
     public int TryApply(Puzzle puzzle)
@@ -17,43 +17,80 @@ public class FishTechnique(int n) : ISolvingTechnique
             throw new InvalidOperationException("FishTechniques must use IStandardRuleSet.");
 
 
-
-        var rowCandidates = GetConstraintsAndCandidatesByValue(
+        // Find rows and columns containing each candidate in two to _n cells.
+        var rowCandidates = GetConstraintsAndCellsByCandidateValue(
             puzzle,
             ruleSet.RowConstraints);
-
-        var columnCandidates = GetConstraintsAndCandidatesByValue(
+        var columnCandidates = GetConstraintsAndCellsByCandidateValue(
             puzzle,
             ruleSet.ColumnConstraints);
 
-        for (int value = 1; value <= puzzle.Board.Size; value++)
-        {
-            if (!rowCandidates.TryGetValue(value, out var rowList))
-                continue;
-
-
-            // check for row based fish n+ rows? <n? idk
-
-            if (!columnCandidates.TryGetValue(value, out var columnList))
-                continue;
-
-
-            // check for column based fish
-        }
+        applied += ApplyFish(
+            puzzle,
+            rowCandidates,
+            ruleSet.GetContainingColumn);
+        applied += ApplyFish(
+            puzzle,
+            columnCandidates,
+            ruleSet.GetContainingRow);
 
         return applied;
     }
 
+    private int ApplyFish(
+        Puzzle puzzle,
+        Dictionary<int, List<(IConstraint constraint, List<Cell> cells)>> baseCandidates,
+        Func<Cell, IConstraint> getPerpendicularConstraint)
+    {
+        var changes = 0;
+
+        for (var value = 1; value <= puzzle.Board.Size; value++)
+        {
+            // Find exactly _n base groups that can contain a fish for this candidate.
+            if (!baseCandidates.TryGetValue(value, out var baseList) || baseList.Count != _n)
+                continue;
+
+            // The candidate cells in those groups must occupy exactly _n perpendicular groups.
+            var perpendicularGroups = baseList
+                .SelectMany(group => group.cells)
+                .Select(getPerpendicularConstraint)
+                .Distinct()
+                .ToList();
+
+            if (perpendicularGroups.Count != _n)
+                continue;
+
+            // Remove the candidate from perpendicular groups outside the base groups.
+            foreach (var group in perpendicularGroups)
+            {
+                foreach (var cell in group.Cells)
+                {
+                    if (baseList.Any(baseGroup => baseGroup.constraint.Cells.Contains(cell)))
+                        continue;
+
+                    if (!cell.HasCandidate((byte)value))
+                        continue;
+
+                    puzzle.RemoveCandidate(cell, (byte)value);
+                    changes++;
+                }
+            }
+        }
+
+        return changes;
+    }
+
     private Dictionary<int, List<(IConstraint constraint, List<Cell> cells)>>
-        GetConstraintsAndCandidatesByValue(
+        GetConstraintsAndCellsByCandidateValue(
             Puzzle puzzle,
             IEnumerable<IConstraint> constraints)
     {
         var result = new Dictionary<int, List<(IConstraint constraint, List<Cell> cells)>>();
 
+        // Group candidate cells by value for each constraint.
         foreach (var constraint in constraints)
         {
-            var candidatesByValue = CountNCandidatesByValue(puzzle, constraint);
+            var candidatesByValue = CountTwoToNCandidatesByValue(puzzle, constraint);
 
             foreach (var (value, cells) in candidatesByValue)
             {
@@ -69,7 +106,7 @@ public class FishTechnique(int n) : ISolvingTechnique
         return result;
     }
 
-    private Dictionary<int, List<Cell>> CountNCandidatesByValue(Puzzle puzzle, IConstraint constraint)
+    private Dictionary<int, List<Cell>> CountTwoToNCandidatesByValue(Puzzle puzzle, IConstraint constraint)
     {
         var candidateCells = Enumerable
             .Range(0, puzzle.Board.Size + 1)
@@ -85,9 +122,10 @@ public class FishTechnique(int n) : ISolvingTechnique
                 candidateCells[cand].Add(cell);
         }
 
+        // A fish requires at least two and at most _n candidate cells in a group.
         return candidateCells
             .Select((cells, val) => (val, cells))
-            .Where(x => x.cells.Count == _n)
+            .Where(x => x.cells.Count >= 2 && x.cells.Count <= _n)  // at least [2,n] cells
             .ToDictionary(x => x.val, x => x.cells);
     }
 }

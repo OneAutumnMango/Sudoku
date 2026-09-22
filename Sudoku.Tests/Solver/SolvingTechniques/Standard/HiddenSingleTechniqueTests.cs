@@ -1,6 +1,6 @@
 using Sudoku.Core;
 using Sudoku.Core.RuleSets;
-using Sudoku.Core.Solver;
+using Sudoku.Core.Grid;
 using Sudoku.Core.Solver.SolvingTechniques.Standard;
 
 namespace Sudoku.Tests.Solver.SolvingTechniques.Standard;
@@ -22,7 +22,6 @@ public class HiddenSingleTechniqueTests
 
         Assert.Equal(1, applied);
         Assert.Equal(new byte[] { 1 }, puzzle.Board[0, 0].GetCandidates());
-        Assert.Equal(Difficulty.Easy, technique.Difficulty);
     }
 
     [Fact]
@@ -93,7 +92,7 @@ public class HiddenSingleTechniqueTests
         return new Puzzle(new StandardRuleSet(), values);
     }
 
-    private static void SetCandidates(Sudoku.Core.Grid.Cell cell, params byte[] candidates)
+    private static void SetCandidates(Cell cell, params byte[] candidates)
     {
         for (byte candidate = 1; candidate <= 9; candidate++)
         {

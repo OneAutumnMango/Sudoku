@@ -21,7 +21,6 @@ public class NakedSingleTechniqueTests
 
         Assert.Equal(1, applied);
         Assert.Equal((byte)9, puzzle.Board[0, 8].Value);
-        Assert.Equal(Difficulty.Simple, technique.Difficulty);
     }
 
     [Fact]

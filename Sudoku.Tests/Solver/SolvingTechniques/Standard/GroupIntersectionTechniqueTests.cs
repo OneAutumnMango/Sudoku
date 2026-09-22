@@ -1,4 +1,5 @@
 using Sudoku.Core;
+using Sudoku.Core.Grid;
 using Sudoku.Core.RuleSets;
 using Sudoku.Core.Solver.SolvingTechniques.Standard;
 
@@ -76,7 +77,7 @@ public class GroupIntersectionTechniqueTests
         Assert.Equal(0, applied);
     }
 
-    private static void SetCandidates(Sudoku.Core.Grid.Cell cell, params byte[] candidates)
+    private static void SetCandidates(Cell cell, params byte[] candidates)
     {
         for (byte candidate = 1; candidate <= 9; candidate++)
         {
