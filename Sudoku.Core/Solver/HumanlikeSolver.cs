@@ -23,10 +23,13 @@ public class HumanlikeSolver(Puzzle puzzle)
             new HiddenTripleTechnique(),
 
             new PointingTechnique(),
-
             new BoxLineReductionTechnique(),
 
-            // x wing, y wing
+            // y wing
+
+            new XWingTechnique(),
+            new SwordfishTechnique(),
+            new JellyfishTechnique(),
         ];
 
         foreach (var difficulty in Enum.GetValues<Difficulty>())

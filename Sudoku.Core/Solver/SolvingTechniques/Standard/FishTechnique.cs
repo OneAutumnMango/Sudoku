@@ -46,33 +46,35 @@ public class FishTechnique(int n) : ISolvingTechnique
 
         for (var value = 1; value <= puzzle.Board.Size; value++)
         {
-            // Find exactly _n base groups that can contain a fish for this candidate.
-            if (!baseCandidates.TryGetValue(value, out var baseList) || baseList.Count != _n)
+            if (!baseCandidates.TryGetValue(value, out var baseList))
                 continue;
 
-            // The candidate cells in those groups must occupy exactly _n perpendicular groups.
-            var perpendicularGroups = baseList
-                .SelectMany(group => group.cells)
-                .Select(getPerpendicularConstraint)
-                .Distinct()
-                .ToList();
-
-            if (perpendicularGroups.Count != _n)
-                continue;
-
-            // Remove the candidate from perpendicular groups outside the base groups.
-            foreach (var group in perpendicularGroups)
+            foreach (var baseGroupCombination in GetCombinations(baseList, _n))
             {
-                foreach (var cell in group.Cells)
+                // The candidate cells in those groups must occupy exactly _n perpendicular groups.
+                var perpendicularGroups = baseGroupCombination
+                    .SelectMany(group => group.cells)
+                    .Select(getPerpendicularConstraint)
+                    .Distinct()
+                    .ToList();
+
+                if (perpendicularGroups.Count != _n)
+                    continue;
+
+                // Remove the candidate from perpendicular groups outside the base groups.
+                foreach (var group in perpendicularGroups)
                 {
-                    if (baseList.Any(baseGroup => baseGroup.constraint.Cells.Contains(cell)))
-                        continue;
+                    foreach (var cell in group.Cells)
+                    {
+                        if (baseGroupCombination.Any(baseGroup => baseGroup.constraint.Cells.Contains(cell)))
+                            continue;
 
-                    if (!cell.HasCandidate((byte)value))
-                        continue;
+                        if (!cell.HasCandidate((byte)value))
+                            continue;
 
-                    puzzle.RemoveCandidate(cell, (byte)value);
-                    changes++;
+                        puzzle.RemoveCandidate(cell, (byte)value);
+                        changes++;
+                    }
                 }
             }
         }
@@ -127,5 +129,30 @@ public class FishTechnique(int n) : ISolvingTechnique
             .Select((cells, val) => (val, cells))
             .Where(x => x.cells.Count >= 2 && x.cells.Count <= _n)  // at least [2,n] cells
             .ToDictionary(x => x.val, x => x.cells);
+    }
+
+    private static IEnumerable<IReadOnlyList<T>> GetCombinations<T>(
+        IReadOnlyList<T> items,
+        int count,
+        int startIndex = 0,
+        List<T>? selected = null)
+    {
+        selected ??= [];
+
+        if (selected.Count == count)
+        {
+            yield return selected.ToList();
+            yield break;
+        }
+
+        for (var index = startIndex; index <= items.Count - (count - selected.Count); index++)
+        {
+            selected.Add(items[index]);
+
+            foreach (var combination in GetCombinations(items, count, index + 1, selected))
+                yield return combination;
+
+            selected.RemoveAt(selected.Count - 1);
+        }
     }
 }

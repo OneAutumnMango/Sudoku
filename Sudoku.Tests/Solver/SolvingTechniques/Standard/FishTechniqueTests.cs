@@ -46,6 +46,35 @@ public class FishTechniqueTests
     }
 
     [Fact]
+    public void TryApply_WhenValidFishIsAmongExtraCandidateRows_FindsFishCombination()
+    {
+        var puzzle = new Puzzle(new StandardRuleSet());
+        var ruleSet = (StandardRuleSet)puzzle.RuleSet;
+        var cellsWithCandidate = new HashSet<Cell>
+        {
+            puzzle.Board[0, 2], puzzle.Board[0, 5],
+            puzzle.Board[1, 2], puzzle.Board[1, 5],
+            puzzle.Board[2, 2], puzzle.Board[2, 3]
+        };
+
+        foreach (var (_, _, cell) in puzzle.Board.EnumerateAllCells())
+        {
+            if (!cellsWithCandidate.Contains(cell))
+                cell.RemoveCandidate(1);
+        }
+
+        Assert.Equal(
+            3,
+            ruleSet.RowConstraints
+                .Count(row => row.Cells.Any(cell => cell.HasCandidate(1))));
+
+        var applied = new FishTechnique(2).TryApply(puzzle);
+
+        Assert.Equal(1, applied);
+        Assert.DoesNotContain((byte)1, puzzle.Board[2, 2].GetCandidates());
+    }
+
+    [Fact]
     public void TryApply_WhenColumnFishExists_RemovesCandidatesFromFishRowsOutsideFishColumns()
     {
         var puzzle = new Puzzle(new StandardRuleSet());
