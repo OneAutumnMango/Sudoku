@@ -135,4 +135,9 @@ public sealed class StandardRuleSet : IStandardRuleSet
                 cell.IntersectRuleCandidates(constraint.GetAllowedCandidates(cell));
         }
     }
+
+    public IEnumerable<IConstraint> GetContainingConstraints(Cell cell)
+    {
+        return _cache.ConstraintsByCell[cell];
+    }
 }

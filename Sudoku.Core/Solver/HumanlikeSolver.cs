@@ -25,7 +25,7 @@ public class HumanlikeSolver(Puzzle puzzle)
             new PointingTechnique(),
             new BoxLineReductionTechnique(),
 
-            // y wing
+            new YWingTechnique(),
 
             new XWingTechnique(),
             new SwordfishTechnique(),

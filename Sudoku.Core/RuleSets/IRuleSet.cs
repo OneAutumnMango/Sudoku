@@ -11,6 +11,7 @@ public interface IRuleSet
     public Option<IConstraint> FindFirstUnsatisfiedConstraint();
     public void ComputeAndFillCandidates();
     public void UpdateCandidates(Cell changedCell);
+    public IEnumerable<IConstraint> GetContainingConstraints(Cell cell);
 }
 
 public interface IStandardRuleSet : IRuleSet
