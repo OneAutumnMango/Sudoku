@@ -18,17 +18,18 @@ public class NakedNTechniqueTests
         var applied = new NakedNTechnique(2).TryApply(puzzle);
 
         // the pair shares a row and a box, so both constraints clear their own peers
-        Assert.Equal(13, applied);
+        Assert.Equal(26, applied);
         CandidateAssert.HasCandidates(puzzle, 0, 0, 1, 2);
         CandidateAssert.HasCandidates(puzzle, 0, 1, 1, 2);
         CandidateAssert.HasCandidates(puzzle, 0, 2, 3);
         CandidateAssert.Eliminated(snapshot, puzzle.Board, Removals([1, 2],
             (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8),
             (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)));
+        CandidateAssert.AppliedMatchesDiff(applied, snapshot, puzzle.Board);
     }
 
     [Fact]
-    public void TryApply_CountsChangedCellsNotRemovedCandidates()
+    public void TryApply_CountsRemovedCandidatesNotChangedCells()
     {
         var puzzle = PuzzleFactory.Empty()
             .WithCandidates(0, 0, 1, 2)
@@ -37,7 +38,8 @@ public class NakedNTechniqueTests
         var snapshot = CandidateSnapshot.Capture(puzzle.Board);
         var applied = new NakedNTechnique(2).TryApply(puzzle);
 
-        Assert.Equal(13, applied);
+        // 13 peer cells each lose both candidates
+        Assert.Equal(26, applied);
         Assert.Equal(26, snapshot.TotalRemoved(puzzle.Board));
     }
 
@@ -51,7 +53,7 @@ public class NakedNTechniqueTests
         var snapshot = CandidateSnapshot.Capture(puzzle.Board);
         var applied = new NakedNTechnique(2).TryApply(puzzle);
 
-        Assert.Equal(7, applied);
+        Assert.Equal(14, applied);
         CandidateAssert.Eliminated(snapshot, puzzle.Board, Removals([1, 2],
             (1, 0), (2, 0), (4, 0), (5, 0), (6, 0), (7, 0), (8, 0)));
     }
@@ -66,7 +68,7 @@ public class NakedNTechniqueTests
         var snapshot = CandidateSnapshot.Capture(puzzle.Board);
         var applied = new NakedNTechnique(2).TryApply(puzzle);
 
-        Assert.Equal(7, applied);
+        Assert.Equal(14, applied);
         CandidateAssert.Eliminated(snapshot, puzzle.Board, Removals([1, 2],
             (0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1)));
     }
@@ -82,7 +84,7 @@ public class NakedNTechniqueTests
         var snapshot = CandidateSnapshot.Capture(puzzle.Board);
         var applied = new NakedNTechnique(2).TryApply(puzzle);
 
-        Assert.Equal(12, applied);
+        Assert.Equal(24, applied);
         CandidateAssert.NoFilledCellTouched(snapshot, puzzle.Board);
         CandidateAssert.Eliminated(snapshot, puzzle.Board, Removals([1, 2],
             (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7),
@@ -100,7 +102,7 @@ public class NakedNTechniqueTests
 
         var applied = new NakedNTechnique(3).TryApply(puzzle);
 
-        Assert.Equal(12, applied);
+        Assert.Equal(36, applied);
         CandidateAssert.HasCandidates(puzzle, 0, 3, 4);
     }
 
@@ -131,7 +133,7 @@ public class NakedNTechniqueTests
         var snapshot = CandidateSnapshot.Capture(puzzle.Board);
         var applied = new NakedNTechnique(4).TryApply(puzzle);
 
-        Assert.Equal(5, applied);
+        Assert.Equal(20, applied);
         CandidateAssert.HasCandidates(puzzle, 0, 4, 5);
         CandidateAssert.Eliminated(snapshot, puzzle.Board, Removals([1, 2, 3, 4],
             (0, 4), (0, 5), (0, 6), (0, 7), (0, 8)));
@@ -146,7 +148,7 @@ public class NakedNTechniqueTests
 
         var technique = new NakedNTechnique(2);
 
-        Assert.Equal(13, technique.TryApply(puzzle));
+        Assert.Equal(26, technique.TryApply(puzzle));
         Assert.Equal(0, technique.TryApply(puzzle));
     }
 

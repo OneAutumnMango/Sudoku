@@ -10,6 +10,8 @@ public class YWingTechnique : ISolvingTechnique
 
     public int TryApply(Puzzle puzzle)
     {
+        ArgumentNullException.ThrowIfNull(puzzle);
+
         int applied = 0;
 
         var pivotCandidates = puzzle.Board.EnumerateEmptyCells()
@@ -67,15 +69,12 @@ public class YWingTechnique : ISolvingTechnique
                 if (xwings.Count == 0 || ywings.Count == 0)
                     continue;
 
-                foreach (var (xConstraint, xCell) in xwings)
+                foreach (var (_, xCell) in xwings)
                 {
-                    foreach (var (yConstraint, yCell) in ywings)
+                    foreach (var (_, yCell) in ywings)
                     {
                         if (xCell == yCell)
                             continue;  // cell may be added twice under two different constraints (ie if in the row and box of pivot)
-
-                        if (xConstraint == yConstraint)
-                            continue;
 
                         // get intersections of all constraints with eachother to form a set of cells where Z can be eliminated
 

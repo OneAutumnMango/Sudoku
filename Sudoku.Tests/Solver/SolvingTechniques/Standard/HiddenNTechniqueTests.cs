@@ -18,8 +18,7 @@ public class HiddenNTechniqueTests
         var snapshot = CandidateSnapshot.Capture(puzzle.Board);
         var applied = new HiddenNTechnique(2).TryApply(puzzle);
 
-        // the return value counts tuples found, not candidates removed
-        Assert.Equal(1, applied);
+        Assert.Equal(2, applied);
         Assert.Equal(2, snapshot.TotalRemoved(puzzle.Board));
         CandidateAssert.Eliminated(snapshot, puzzle.Board, new Elimination(0, 0, 3), new Elimination(0, 1, 4));
         CandidateAssert.HasCandidates(puzzle, 0, 0, 1, 2);
@@ -39,7 +38,7 @@ public class HiddenNTechniqueTests
         var snapshot = CandidateSnapshot.Capture(puzzle.Board);
         var applied = new HiddenNTechnique(2).TryApply(puzzle);
 
-        Assert.Equal(1, applied);
+        Assert.Equal(2, applied);
         CandidateAssert.Eliminated(snapshot, puzzle.Board, new Elimination(1, 1, 3), new Elimination(2, 2, 4));
     }
 
@@ -55,7 +54,7 @@ public class HiddenNTechniqueTests
         var snapshot = CandidateSnapshot.Capture(puzzle.Board);
         var applied = new HiddenNTechnique(3).TryApply(puzzle);
 
-        Assert.Equal(1, applied);
+        Assert.Equal(3, applied);
         CandidateAssert.Eliminated(snapshot, puzzle.Board,
             new Elimination(0, 0, 4), new Elimination(0, 1, 5), new Elimination(0, 2, 6));
         CandidateAssert.HasCandidates(puzzle, 0, 0, 1, 2);
@@ -76,7 +75,7 @@ public class HiddenNTechniqueTests
         var snapshot = CandidateSnapshot.Capture(puzzle.Board);
         var applied = new HiddenNTechnique(4).TryApply(puzzle);
 
-        Assert.Equal(1, applied);
+        Assert.Equal(4, applied);
         CandidateAssert.Eliminated(snapshot, puzzle.Board,
             new Elimination(0, 0, 5), new Elimination(0, 1, 6),
             new Elimination(0, 2, 7), new Elimination(0, 3, 8));
@@ -91,7 +90,7 @@ public class HiddenNTechniqueTests
 
         var applied = new HiddenNTechnique(1).TryApply(puzzle);
 
-        Assert.Equal(1, applied);
+        Assert.Equal(8, applied);
         CandidateAssert.HasCandidates(puzzle, 0, 0, 1);
         Assert.Equal(0, puzzle.Board[0, 0].Value);
     }
@@ -135,7 +134,7 @@ public class HiddenNTechniqueTests
 
         var technique = new HiddenNTechnique(2);
 
-        Assert.Equal(1, technique.TryApply(puzzle));
+        Assert.Equal(2, technique.TryApply(puzzle));
         Assert.Equal(0, technique.TryApply(puzzle));
     }
 

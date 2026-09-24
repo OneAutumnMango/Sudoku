@@ -11,10 +11,14 @@ public class FishTechnique(int n) : ISolvingTechnique
 
     public int TryApply(Puzzle puzzle)
     {
+        ArgumentNullException.ThrowIfNull(puzzle);
+
         var applied = 0;
 
         if (puzzle.RuleSet is not IStandardRuleSet ruleSet)
-            throw new InvalidOperationException("FishTechniques must use IStandardRuleSet.");
+            throw new ArgumentException(
+                "Fish techniques require standard Sudoku rules.",
+                nameof(puzzle));
 
 
         // Find rows and columns containing each candidate in two to _n cells.

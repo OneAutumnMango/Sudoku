@@ -81,19 +81,27 @@ public class YWingTechniqueTests
     }
 
     [Fact]
-    public void TryApply_WhenBothWingsShareTheSamePivotGroup_ReturnsZero()
+    public void TryApply_WhenBothWingsShareThePivotRow_RemovesEveryZFromThatRow()
     {
-        // a valid Y-Wing, but this implementation requires the wings to reach the pivot
-        // through two different constraints, so the elimination of 3 from row 0 is missed
+        // all three cells sit in row 0, which yields a Y-Wing from each of them in turn
         var puzzle = PuzzleFactory.Empty()
             .WithCandidates(0, 0, 1, 2)
             .WithCandidates(0, 4, 1, 3)
             .WithCandidates(0, 7, 2, 3);
 
         var snapshot = CandidateSnapshot.Capture(puzzle.Board);
+        var applied = new YWingTechnique().TryApply(puzzle);
 
-        Assert.Equal(0, new YWingTechnique().TryApply(puzzle));
-        CandidateAssert.NothingEliminated(snapshot, puzzle.Board);
+        Assert.Equal(18, applied);
+        CandidateAssert.Eliminated(snapshot, puzzle.Board,
+            [.. new[] { 1, 2, 3, 5, 6, 8 }
+                .SelectMany(col => new byte[] { 1, 2, 3 }.Select(z => new Elimination(0, col, z)))]);
+    }
+
+    [Fact]
+    public void TryApply_WhenPuzzleIsNull_Throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => new YWingTechnique().TryApply(null!));
     }
 
     [Fact]

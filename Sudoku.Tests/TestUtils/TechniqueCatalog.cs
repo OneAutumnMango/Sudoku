@@ -100,29 +100,11 @@ public static class TechniqueCatalog
         };
     }
 
-    /// <summary>
-    /// True only for techniques whose return value is a count of eliminated candidates.
-    /// NakedN counts changed cells, HiddenN counts subsets found and NakedSingle counts placements.
-    /// </summary>
-    public static bool CountsEliminations(string name) =>
-        name is Pointing or BoxLine
-            or nameof(PointingTechnique)
-            or nameof(BoxLineReductionTechnique)
-            or nameof(YWingTechnique)
-            or nameof(XWingTechnique)
-            or nameof(SwordfishTechnique)
-            or nameof(JellyfishTechnique)
-        || name.StartsWith("Fish(", StringComparison.Ordinal);
+    /// <summary>NakedSingle returns placements, every other technique returns eliminated candidates.</summary>
+    public static bool CountsEliminations(string name) => !PlacesValues(name);
 
     /// <summary>NakedSingle writes values, so it legitimately changes cells from empty to filled.</summary>
     public static bool PlacesValues(string name) => name == nameof(NakedSingleTechnique);
-
-    /// <summary>HiddenN returns the number of subsets found, not the number of candidates removed.</summary>
-    public static bool IsHidden(string name) =>
-        name.StartsWith("HiddenN(", StringComparison.Ordinal)
-        || name is nameof(HiddenSingleTechnique)
-            or nameof(HiddenPairTechnique)
-            or nameof(HiddenTripleTechnique);
 
     public static Difficulty ExpectedDifficulty(string name) => name switch
     {

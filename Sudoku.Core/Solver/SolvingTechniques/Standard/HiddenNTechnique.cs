@@ -61,9 +61,9 @@ public sealed class HiddenNTechnique : ISolvingTechnique
                     // cant set cell candidates so have to remove the others
                     var candsToRemove = (ushort)(cell.Candidates & ~unionMask);
                     puzzle.RemoveCandidates(cell, candsToRemove);
-                }
 
-                applied++;
+                    applied += BitOperations.PopCount(candsToRemove);
+                }
             }
         }
 

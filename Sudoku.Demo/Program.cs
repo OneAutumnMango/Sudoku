@@ -86,6 +86,56 @@ void generateNSolvable(int n, string filePath)
 
 
 
+void regradeCorpus(string filePath)
+{
+    var options = new JsonSerializerOptions { WriteIndented = true };
+    options.Converters.Add(new JsonStringEnumConverter());
+
+    var puzzles = JsonSerializer.Deserialize<List<GeneratedPuzzle>>(File.ReadAllText(filePath), options)!;
+    var drift = new Dictionary<(Difficulty From, Difficulty To), int>();
+    var unsolved = 0;
+
+    for (var i = 0; i < puzzles.Count; i++)
+    {
+        var entry = puzzles[i];
+        var puzzle = new Puzzle(new StandardRuleSet(), ParseGrid(entry.Puzzle));
+        var difficulty = new HumanlikeSolver(puzzle).Solve();
+
+        if (difficulty.IsNone || puzzle.Board.ToCompactString() != entry.Solution)
+        {
+            unsolved++;
+            continue;
+        }
+
+        if (difficulty.Value != entry.Difficulty)
+        {
+            var key = (entry.Difficulty, difficulty.Value);
+            drift[key] = drift.GetValueOrDefault(key) + 1;
+            puzzles[i] = entry with { Difficulty = difficulty.Value };
+        }
+    }
+
+    File.WriteAllText(filePath, JsonSerializer.Serialize(puzzles, options));
+
+    Console.WriteLine($"Re-graded {puzzles.Count} puzzles, {unsolved} no longer solve to the stored solution.");
+    foreach (var ((from, to), count) in drift.OrderByDescending(kv => kv.Value))
+        Console.WriteLine($"{from} -> {to}: {count}");
+
+    foreach (var difficulty in Enum.GetValues<Difficulty>())
+        Console.WriteLine($"{difficulty}: {puzzles.Count(p => p.Difficulty == difficulty)}");
+}
+
+int[,] ParseGrid(string grid)
+{
+    var cells = grid.Where(c => !char.IsWhiteSpace(c)).ToArray();
+    var values = new int[9, 9];
+
+    for (var i = 0; i < cells.Length; i++)
+        values[i / 9, i % 9] = cells[i] == '.' ? 0 : cells[i] - '0';
+
+    return values;
+}
+
 GeneratedPuzzle? FindAndPrintPuzzleUsingTechnique(
     string techniqueName,
     int maxAttempts = 10_000)
@@ -173,6 +223,7 @@ GeneratedPuzzle? FindAndPrintPuzzleWithDifficulty(
 // FindAndPrintPuzzleWithDifficulty(Difficulty.Advanced);
 
 // generateNSolvable(10000, "generated_puzzles.json");
+// regradeCorpus("generated_puzzles.json");
 
 Console.WriteLine(". 8 . 2 . . . . 9\r\n. . 1 . . 5 . . .\r\n. . 6 7 . . . 3 .\r\n. 2 . . . . 1 . .\r\n. . . . 2 9 . . .\r\n. . 7 . . 6 5 . .\r\n. . 2 . 6 . . . .\r\n. 9 . . 5 4 . . 7\r\n6 . . . 7 . . 8 .");
 

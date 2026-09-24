@@ -54,8 +54,7 @@ public sealed class NakedNTechnique : ISolvingTechnique
                     var before = cell.Candidates;
                     cell.IntersectCandidates((ushort)~subsetMask);
 
-                    if (cell.Candidates != before)
-                        applied++;
+                    applied += BitOperations.PopCount((ushort)(before & subsetMask));
                 }
             }
         }

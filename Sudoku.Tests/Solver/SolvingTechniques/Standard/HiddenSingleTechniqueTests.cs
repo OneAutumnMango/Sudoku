@@ -15,7 +15,7 @@ public class HiddenSingleTechniqueTests
         var snapshot = CandidateSnapshot.Capture(puzzle.Board);
         var applied = new HiddenSingleTechnique().TryApply(puzzle);
 
-        Assert.Equal(1, applied);
+        Assert.Equal(8, applied);
         CandidateAssert.HasCandidates(puzzle, 0, 0, 1);
         Assert.Equal(0, puzzle.Board[0, 0].Value);
         Assert.Equal(8, snapshot.TotalRemoved(puzzle.Board));
@@ -37,12 +37,12 @@ public class HiddenSingleTechniqueTests
 
         var applied = new HiddenSingleTechnique().TryApply(puzzle);
 
-        Assert.Equal(1, applied);
+        Assert.Equal(8, applied);
         CandidateAssert.HasCandidates(puzzle, 1, 1, 5);
     }
 
     [Fact]
-    public void TryApply_WhenSeveralHiddenSinglesExist_CountsEachOne()
+    public void TryApply_WhenSeveralHiddenSinglesExist_ReducesEachOne()
     {
         var puzzle = PuzzleFactory.Empty();
         ConfineToCell(puzzle, 1, row: 0, col: 0);
@@ -50,7 +50,7 @@ public class HiddenSingleTechniqueTests
 
         var applied = new HiddenSingleTechnique().TryApply(puzzle);
 
-        Assert.Equal(2, applied);
+        Assert.Equal(16, applied);
         CandidateAssert.HasCandidates(puzzle, 0, 0, 1);
         CandidateAssert.HasCandidates(puzzle, 8, 8, 2);
     }
@@ -63,7 +63,7 @@ public class HiddenSingleTechniqueTests
 
         var technique = new HiddenSingleTechnique();
 
-        Assert.Equal(1, technique.TryApply(puzzle));
+        Assert.Equal(8, technique.TryApply(puzzle));
         Assert.Equal(0, technique.TryApply(puzzle));
         CandidateAssert.HasCandidates(puzzle, 0, 0, 1);
     }

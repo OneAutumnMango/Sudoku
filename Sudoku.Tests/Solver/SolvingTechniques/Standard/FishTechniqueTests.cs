@@ -133,7 +133,13 @@ public class FishTechniqueTests
     {
         var puzzle = new Puzzle(new NonStandardRuleSet());
 
-        Assert.Throws<InvalidOperationException>(() => new FishTechnique(2).TryApply(puzzle));
+        Assert.Throws<ArgumentException>(() => new FishTechnique(2).TryApply(puzzle));
+    }
+
+    [Fact]
+    public void TryApply_WhenPuzzleIsNull_Throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => new FishTechnique(2).TryApply(null!));
     }
 
     private static void RestrictRow(Puzzle puzzle, int row, byte candidate, params int[] keepColumns)
