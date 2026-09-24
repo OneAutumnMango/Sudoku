@@ -1,103 +1,99 @@
 using Sudoku.Core;
-using Sudoku.Core.RuleSets;
-using Sudoku.Core.Grid;
 using Sudoku.Core.Solver.SolvingTechniques.Standard;
+using Sudoku.Tests.TestUtils;
 
 namespace Sudoku.Tests.Solver.SolvingTechniques.Standard;
 
 public class HiddenSingleTechniqueTests
 {
     [Fact]
-    public void TryApply_WhenCandidateAppearsOnceInGroup_ReturnsOneChange()
+    public void TryApply_WhenCandidateAppearsOnceInARow_ReducesThatCellWithoutPlacingIt()
     {
-        var puzzle = new Puzzle(new StandardRuleSet());
+        var puzzle = PuzzleFactory.Empty();
+        ConfineToCell(puzzle, 1, row: 0, col: 0);
 
-        SetCandidates(puzzle.Board[0, 0], 1, 2, 3);
-        for (var col = 1; col < 9; col++)
-            SetCandidates(puzzle.Board[0, col], 2, 3, 4, 5, 6, 7, 8, 9);
-
-        var technique = new HiddenSingleTechnique();
-
-        var applied = technique.TryApply(puzzle);
+        var snapshot = CandidateSnapshot.Capture(puzzle.Board);
+        var applied = new HiddenSingleTechnique().TryApply(puzzle);
 
         Assert.Equal(1, applied);
-        Assert.Equal(new byte[] { 1 }, puzzle.Board[0, 0].GetCandidates());
+        CandidateAssert.HasCandidates(puzzle, 0, 0, 1);
+        Assert.Equal(0, puzzle.Board[0, 0].Value);
+        Assert.Equal(8, snapshot.TotalRemoved(puzzle.Board));
     }
 
     [Fact]
-    public void TryApply_WhenCalledAfterApplyingSingle_ReturnsZeroChanges()
+    public void TryApply_WhenCandidateAppearsOnceInABox_ReducesThatCell()
     {
-        var puzzle = new Puzzle(new StandardRuleSet());
-        SetCandidates(puzzle.Board[0, 0], 1, 2, 3);
-        for (var col = 1; col < 9; col++)
-            SetCandidates(puzzle.Board[0, col], 2, 3, 4, 5, 6, 7, 8, 9);
+        var puzzle = PuzzleFactory.Empty();
+
+        for (var row = 0; row < 3; row++)
+        {
+            for (var col = 0; col < 3; col++)
+            {
+                if (row != 1 || col != 1)
+                    puzzle.Board[row, col].RemoveCandidate(5);
+            }
+        }
+
+        var applied = new HiddenSingleTechnique().TryApply(puzzle);
+
+        Assert.Equal(1, applied);
+        CandidateAssert.HasCandidates(puzzle, 1, 1, 5);
+    }
+
+    [Fact]
+    public void TryApply_WhenSeveralHiddenSinglesExist_CountsEachOne()
+    {
+        var puzzle = PuzzleFactory.Empty();
+        ConfineToCell(puzzle, 1, row: 0, col: 0);
+        ConfineToCell(puzzle, 2, row: 8, col: 8);
+
+        var applied = new HiddenSingleTechnique().TryApply(puzzle);
+
+        Assert.Equal(2, applied);
+        CandidateAssert.HasCandidates(puzzle, 0, 0, 1);
+        CandidateAssert.HasCandidates(puzzle, 8, 8, 2);
+    }
+
+    [Fact]
+    public void TryApply_WhenCalledTwice_SecondCallReturnsZero()
+    {
+        var puzzle = PuzzleFactory.Empty();
+        ConfineToCell(puzzle, 1, row: 0, col: 0);
 
         var technique = new HiddenSingleTechnique();
 
         Assert.Equal(1, technique.TryApply(puzzle));
         Assert.Equal(0, technique.TryApply(puzzle));
-        Assert.Equal(new byte[] { 1 }, puzzle.Board[0, 0].GetCandidates());
+        CandidateAssert.HasCandidates(puzzle, 0, 0, 1);
     }
 
     [Fact]
-    public void TryApply_WhenNoCandidateIsUniqueInGroup_ReturnsZeroChanges()
+    public void TryApply_WhenNoCandidateIsUniqueInAGroup_ReturnsZero()
     {
-        var puzzle = new Puzzle(new StandardRuleSet());
-        var technique = new HiddenSingleTechnique();
-
-        var applied = technique.TryApply(puzzle);
-
-        Assert.Equal(0, applied);
+        Assert.Equal(0, new HiddenSingleTechnique().TryApply(PuzzleFactory.Empty()));
     }
 
     [Fact]
-    public void TryApply_WhenCandidatesChangeBetweenGroups_DoesNotCreateDuplicates()
+    public void TryApply_OnCorpusPuzzles_NeverRemovesASolutionCandidate()
     {
-        var puzzle = CreateMultipleHiddenSinglePuzzle();
-
-        var applied = new HiddenSingleTechnique().TryApply(puzzle);
-
-        Assert.NotEqual(0, applied);
-    }
-
-    [Fact]
-    public void TryApply_WhenMultipleHiddenSinglesExist_ReturnsNumberOfChangedCells()
-    {
-        var puzzle = CreateMultipleHiddenSinglePuzzle();
-
-        var applied = new HiddenSingleTechnique().TryApply(puzzle);
-
-        Assert.NotEqual(0, applied);
-    }
-
-    private static Puzzle CreateMultipleHiddenSinglePuzzle()
-    {
-        return CreatePuzzle(
-            new int[,]
-            {
-                { 5, 0, 0, 0, 0, 8, 3, 4, 0 },
-                { 0, 0, 0, 0, 0, 0, 0, 9, 0 },
-                { 0, 0, 4, 2, 0, 0, 0, 6, 0 },
-                { 0, 0, 0, 8, 3, 0, 0, 0, 0 },
-                { 0, 9, 0, 5, 7, 4, 0, 0, 2 },
-                { 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-                { 3, 0, 0, 0, 1, 5, 0, 0, 0 },
-                { 0, 0, 8, 0, 0, 2, 0, 0, 4 },
-                { 2, 0, 1, 0, 0, 0, 0, 0, 0 }
-            });
-    }
-
-    private static Puzzle CreatePuzzle(int[,] values)
-    {
-        return new Puzzle(new StandardRuleSet(), values);
-    }
-
-    private static void SetCandidates(Cell cell, params byte[] candidates)
-    {
-        for (byte candidate = 1; candidate <= 9; candidate++)
+        foreach (var entry in PuzzleCorpus.Take(25))
         {
-            if (!candidates.Contains(candidate))
-                cell.RemoveCandidate(candidate);
+            var puzzle = PuzzleFactory.FromString(entry.Puzzle);
+
+            new HiddenSingleTechnique().TryApply(puzzle);
+
+            SolutionInvariant.AssertPreserved(puzzle, entry.Solution, "Hidden single broke the solution:");
+        }
+    }
+
+    /// <summary>Leaves <paramref name="candidate"/> in only one cell of the given row.</summary>
+    private static void ConfineToCell(Puzzle puzzle, byte candidate, int row, int col)
+    {
+        for (var other = 0; other < 9; other++)
+        {
+            if (other != col)
+                puzzle.Board[row, other].RemoveCandidate(candidate);
         }
     }
 }

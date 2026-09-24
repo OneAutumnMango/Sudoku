@@ -69,7 +69,7 @@ public class FishTechnique(int n) : ISolvingTechnique
                         if (baseGroupCombination.Any(baseGroup => baseGroup.constraint.Cells.Contains(cell)))
                             continue;
 
-                        if (!cell.HasCandidate((byte)value))
+                        if (cell.Value != 0 || !cell.HasCandidate((byte)value))
                             continue;
 
                         puzzle.RemoveCandidate(cell, (byte)value);
