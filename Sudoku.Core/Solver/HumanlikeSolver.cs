@@ -30,6 +30,8 @@ public class HumanlikeSolver(Puzzle puzzle)
             new XWingTechnique(),
             new SwordfishTechnique(),
             new JellyfishTechnique(),
+
+            new SimpleColouringTechnique(),
         ];
 
         foreach (var difficulty in Enum.GetValues<Difficulty>())

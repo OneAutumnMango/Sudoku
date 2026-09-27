@@ -2,7 +2,7 @@ namespace Sudoku.Core.Solver.SolvingTechniques.Standard;
 
 public sealed class XWingTechnique : ISolvingTechnique
 {
-    public Difficulty Difficulty => Difficulty.Advanced;
+    public Difficulty Difficulty => Difficulty.Intermediate;
     private static readonly int _n = 2;
     private readonly FishTechnique _fishTechnique = new(_n);
 

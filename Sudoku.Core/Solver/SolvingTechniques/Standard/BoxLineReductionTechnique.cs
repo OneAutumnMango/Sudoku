@@ -4,7 +4,7 @@ using Sudoku.Core.RuleSets;
 
 public sealed class BoxLineReductionTechnique : ISolvingTechnique
 {
-    public Difficulty Difficulty => Difficulty.Advanced;
+    public Difficulty Difficulty => Difficulty.Intermediate;
 
     public int TryApply(Puzzle puzzle)
     {

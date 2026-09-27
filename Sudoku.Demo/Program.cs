@@ -219,10 +219,10 @@ GeneratedPuzzle? FindAndPrintPuzzleWithDifficulty(
 }
 
 // FindAndPrintPuzzleUsingTechnique("XWingTechnique");
-// FindAndPrintPuzzleUsingTechnique("SwordfishTechnique");
+FindAndPrintPuzzleUsingTechnique("SimpleColouringTechnique");
 // FindAndPrintPuzzleWithDifficulty(Difficulty.Advanced);
 
-generateNSolvable(10000, "generated_puzzles.json");
+// generateNSolvable(10000, "generated_puzzles.json");
 // regradeCorpus("generated_puzzles.json");
 
 // Console.WriteLine(". 8 . 2 . . . . 9\r\n. . 1 . . 5 . . .\r\n. . 6 7 . . . 3 .\r\n. 2 . . . . 1 . .\r\n. . . . 2 9 . . .\r\n. . 7 . . 6 5 . .\r\n. . 2 . 6 . . . .\r\n. 9 . . 5 4 . . 7\r\n6 . . . 7 . . 8 .");
