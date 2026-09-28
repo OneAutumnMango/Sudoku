@@ -181,7 +181,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
 
         foreach (var cell in constraint.Cells)
         {
-            if (cell.Value == 0)
+            if (cell.Value != 0)
                 continue;
 
             ushort candidates = cell.Candidates;
