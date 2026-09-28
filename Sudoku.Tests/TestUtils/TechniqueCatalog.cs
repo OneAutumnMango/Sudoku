@@ -110,10 +110,9 @@ public static class TechniqueCatalog
     {
         nameof(NakedSingleTechnique) or nameof(HiddenSingleTechnique) => Difficulty.Simple,
         nameof(NakedPairTechnique) or nameof(HiddenPairTechnique) => Difficulty.Easy,
-        nameof(NakedTripleTechnique) or nameof(HiddenTripleTechnique) or nameof(PointingTechnique) =>
-            Difficulty.Intermediate,
-        nameof(BoxLineReductionTechnique) or nameof(YWingTechnique) or nameof(XWingTechnique) =>
-            Difficulty.Advanced,
+        nameof(NakedTripleTechnique) or nameof(HiddenTripleTechnique) or nameof(PointingTechnique)
+            or nameof(BoxLineReductionTechnique) or nameof(XWingTechnique) => Difficulty.Intermediate,
+        nameof(YWingTechnique) => Difficulty.Advanced,
         nameof(SwordfishTechnique) => Difficulty.Expert,
         nameof(JellyfishTechnique) => Difficulty.Master,
         _ => Difficulty.Unknown,
