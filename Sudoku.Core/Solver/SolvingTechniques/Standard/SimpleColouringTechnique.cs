@@ -48,12 +48,12 @@ public class SimpleColouringTechnique : ISolvingTechnique
 
 
     private IEnumerable<ColouredComponent> GetColouredConnectedComponents(
-        IReadOnlyDictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph)
+        CandidateLinkGraph graph)
     {
         var visited = new HashSet<Cell>();
 
         // BFS for all connected components
-        foreach (var startingCell in graph.Keys)
+        foreach (var startingCell in graph.Cells)
         {
             if (!visited.Add(startingCell))
                 continue;
@@ -73,7 +73,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
 
                 var nextColour = colours[current] == Colour.Red ? Colour.Blue : Colour.Red;
 
-                foreach (var neighbour in graph[current].Keys)
+                foreach (var neighbour in graph.GetLinks(current).Keys)
                 {
                     // colouring conflict cannot occur (at least it shouldnt i think) but this is a safety check anyways
                     if (colours.TryGetValue(neighbour, out var existingColour))
@@ -101,14 +101,14 @@ public class SimpleColouringTechnique : ISolvingTechnique
     private int ApplySameColourCollision(
         Puzzle puzzle,
         byte cand,
-        IReadOnlyDictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph,
+        CandidateLinkGraph graph,
         HashSet<Cell> componentCells,
         Dictionary<Cell, Colour> colours)
     {
         int applied = 0;
 
         var degreeOneCells = componentCells
-            .Where(cell => graph[cell].Count == 1)
+            .Where(cell => graph.GetLinks(cell).Count == 1)
             .ToList();
 
         var degreeOneCellsByConstraint = new Dictionary<IConstraint, HashSet<Cell>>();
@@ -155,7 +155,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
     private int ApplyOppositeColourElimination(
         Puzzle puzzle,
         byte cand,
-        IReadOnlyDictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph,
+        CandidateLinkGraph graph,
         HashSet<Cell> componentCells,
         Dictionary<Cell, Colour> colours)
     {

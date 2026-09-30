@@ -10,23 +10,23 @@ public enum CandidateLinkType
 
 public static class CandidateLinkGraphGenerator
 {
-    public static CandidateLinkGraph GenerateStrongGraph(Puzzle puzzle)
+    public static CandidateLinkGraphSet GenerateStrongGraph(Puzzle puzzle)
     {
         return Generate(puzzle, includeWeakLinks: false);
     }
 
-    public static CandidateLinkGraph GenerateStrongAndWeakGraph(Puzzle puzzle)
+    public static CandidateLinkGraphSet GenerateStrongAndWeakGraph(Puzzle puzzle)
     {
         return Generate(puzzle, includeWeakLinks: true);
     }
 
-    private static CandidateLinkGraph Generate(
+    private static CandidateLinkGraphSet Generate(
         Puzzle puzzle,
         bool includeWeakLinks)
     {
         ArgumentNullException.ThrowIfNull(puzzle);
 
-        var graphs = new CandidateLinkGraph(puzzle.Board.Size);
+        var graphs = new CandidateLinkGraphSet(puzzle.Board.Size);
 
         foreach (var constraint in puzzle.RuleSet.GetConstraints())
         {
@@ -47,7 +47,7 @@ public static class CandidateLinkGraphGenerator
             {
                 if (cells.Count == 2)
                 {
-                    graphs.AddLink(candidate, cells[0], cells[1], CandidateLinkType.Strong);
+                    graphs[candidate].AddLink(cells[0], cells[1], CandidateLinkType.Strong);
                     continue;
                 }
 
@@ -57,7 +57,7 @@ public static class CandidateLinkGraphGenerator
                 for (var firstIndex = 0; firstIndex < cells.Count; firstIndex++)
                 {
                     for (var secondIndex = firstIndex + 1; secondIndex < cells.Count; secondIndex++)
-                        graphs.AddLink(candidate, cells[firstIndex], cells[secondIndex], CandidateLinkType.Weak);
+                        graphs[candidate].AddLink(cells[firstIndex], cells[secondIndex], CandidateLinkType.Weak);
                 }
             }
         }

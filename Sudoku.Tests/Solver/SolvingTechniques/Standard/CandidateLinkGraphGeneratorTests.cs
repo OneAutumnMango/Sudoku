@@ -14,8 +14,8 @@ public class CandidateLinkGraphGeneratorTests
 
         var graph = CandidateLinkGraphGenerator.GenerateStrongGraph(puzzle)[1];
 
-        Assert.Equal(CandidateLinkType.Strong, graph[puzzle.Board[0, 0]][puzzle.Board[0, 1]]);
-        Assert.False(graph[puzzle.Board[0, 0]].ContainsKey(puzzle.Board[1, 2]));
+        Assert.Equal(CandidateLinkType.Strong, graph.GetLinks(puzzle.Board[0, 0])[puzzle.Board[0, 1]]);
+        Assert.False(graph.GetLinks(puzzle.Board[0, 0]).ContainsKey(puzzle.Board[1, 2]));
     }
 
     [Fact]
@@ -25,9 +25,9 @@ public class CandidateLinkGraphGeneratorTests
 
         var graph = CandidateLinkGraphGenerator.GenerateStrongAndWeakGraph(puzzle)[1];
 
-        Assert.Equal(CandidateLinkType.Strong, graph[puzzle.Board[0, 0]][puzzle.Board[0, 1]]);
-        Assert.Equal(CandidateLinkType.Weak, graph[puzzle.Board[0, 0]][puzzle.Board[1, 2]]);
-        Assert.Equal(CandidateLinkType.Weak, graph[puzzle.Board[1, 2]][puzzle.Board[0, 1]]);
+        Assert.Equal(CandidateLinkType.Strong, graph.GetLinks(puzzle.Board[0, 0])[puzzle.Board[0, 1]]);
+        Assert.Equal(CandidateLinkType.Weak, graph.GetLinks(puzzle.Board[0, 0])[puzzle.Board[1, 2]]);
+        Assert.Equal(CandidateLinkType.Weak, graph.GetLinks(puzzle.Board[1, 2])[puzzle.Board[0, 1]]);
     }
 
     [Fact]

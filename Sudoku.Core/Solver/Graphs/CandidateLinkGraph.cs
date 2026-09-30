@@ -4,31 +4,29 @@ namespace Sudoku.Core.Solver.Graphs;
 
 public sealed class CandidateLinkGraph
 {
-    private readonly Dictionary<byte, Dictionary<Cell, Dictionary<Cell, CandidateLinkType>>> _graphs;
+    private readonly Dictionary<Cell, Dictionary<Cell, CandidateLinkType>> _links = [];
 
-    public CandidateLinkGraph(int candidateCount)
+    public byte Candidate { get; }
+    public IReadOnlyCollection<Cell> Cells => _links.Keys;
+
+    public CandidateLinkGraph(byte candidate)
     {
-        _graphs = Enumerable.Range(1, candidateCount)
-            .Select(candidate => (byte)candidate)
-            .ToDictionary(
-                candidate => candidate,
-                _ => new Dictionary<Cell, Dictionary<Cell, CandidateLinkType>>());
+        Candidate = candidate;
     }
 
-    public IReadOnlyDictionary<Cell, Dictionary<Cell, CandidateLinkType>> this[byte candidate] =>
-        _graphs[candidate];
+    public IReadOnlyDictionary<Cell, CandidateLinkType> GetLinks(Cell cell) => _links[cell];
 
-    public void AddLink(byte candidate, Cell first, Cell second, CandidateLinkType linkType)
+    public void AddLink(Cell first, Cell second, CandidateLinkType linkType)
     {
         AddDirectedLink(first, second);
         AddDirectedLink(second, first);
 
         void AddDirectedLink(Cell from, Cell to)
         {
-            if (!_graphs[candidate].TryGetValue(from, out var neighbours))
+            if (!_links.TryGetValue(from, out var neighbours))
             {
                 neighbours = [];
-                _graphs[candidate][from] = neighbours;
+                _links[from] = neighbours;
             }
 
             if (!neighbours.TryGetValue(to, out var existingType)
