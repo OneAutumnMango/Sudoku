@@ -19,7 +19,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
         // check degree 1 cells for collisions
         // remove all candidates for a colour if a collision is found
 
-        var graphs = CandidateLinkGraphGenerator.GenerateStrongGraph(puzzle);
+        var graphs = CandidateChainGraphGenerator.GenerateStrongGraph(puzzle);
 
         for (byte cand = 1; cand <= puzzle.Board.Size; cand++)
         {
@@ -48,12 +48,12 @@ public class SimpleColouringTechnique : ISolvingTechnique
 
 
     private IEnumerable<ColouredComponent> GetColouredConnectedComponents(
-        CandidateLinkGraph graph)
+        CandidateChainGraph graph)
     {
         var visited = new HashSet<Cell>();
 
         // BFS for all connected components
-        foreach (var startingCell in graph.Cells)
+        foreach (var startingCell in graph.Vertices)
         {
             if (!visited.Add(startingCell))
                 continue;
@@ -73,7 +73,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
 
                 var nextColour = colours[current] == Colour.Red ? Colour.Blue : Colour.Red;
 
-                foreach (var neighbour in graph.GetLinks(current).Keys)
+                foreach (var neighbour in graph.GetEdges(current).Keys)
                 {
                     // colouring conflict cannot occur (at least it shouldnt i think) but this is a safety check anyways
                     if (colours.TryGetValue(neighbour, out var existingColour))
@@ -101,14 +101,14 @@ public class SimpleColouringTechnique : ISolvingTechnique
     private int ApplySameColourCollision(
         Puzzle puzzle,
         byte cand,
-        CandidateLinkGraph graph,
+        CandidateChainGraph graph,
         HashSet<Cell> componentCells,
         Dictionary<Cell, Colour> colours)
     {
         int applied = 0;
 
         var degreeOneCells = componentCells
-            .Where(cell => graph.GetLinks(cell).Count == 1)
+            .Where(cell => graph.GetEdges(cell).Count == 1)
             .ToList();
 
         var degreeOneCellsByConstraint = new Dictionary<IConstraint, HashSet<Cell>>();
@@ -155,7 +155,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
     private int ApplyOppositeColourElimination(
         Puzzle puzzle,
         byte cand,
-        CandidateLinkGraph graph,
+        CandidateChainGraph graph,
         HashSet<Cell> componentCells,
         Dictionary<Cell, Colour> colours)
     {

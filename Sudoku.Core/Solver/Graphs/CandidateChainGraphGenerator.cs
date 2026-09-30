@@ -2,31 +2,31 @@ using Sudoku.Core.Grid;
 
 namespace Sudoku.Core.Solver.Graphs;
 
-public enum CandidateLinkType
+public enum CandidateChainEdgeType
 {
     Strong,
     Weak,
 }
 
-public static class CandidateLinkGraphGenerator
+public static class CandidateChainGraphGenerator
 {
-    public static CandidateLinkGraphSet GenerateStrongGraph(Puzzle puzzle)
+    public static CandidateChainGraphSet GenerateStrongGraph(Puzzle puzzle)
     {
         return Generate(puzzle, includeWeakLinks: false);
     }
 
-    public static CandidateLinkGraphSet GenerateStrongAndWeakGraph(Puzzle puzzle)
+    public static CandidateChainGraphSet GenerateStrongAndWeakGraph(Puzzle puzzle)
     {
         return Generate(puzzle, includeWeakLinks: true);
     }
 
-    private static CandidateLinkGraphSet Generate(
+    private static CandidateChainGraphSet Generate(
         Puzzle puzzle,
         bool includeWeakLinks)
     {
         ArgumentNullException.ThrowIfNull(puzzle);
 
-        var graphs = new CandidateLinkGraphSet(puzzle.Board.Size);
+        var graphs = new CandidateChainGraphSet(puzzle.Board.Size);
 
         foreach (var constraint in puzzle.RuleSet.GetConstraints())
         {
@@ -47,7 +47,7 @@ public static class CandidateLinkGraphGenerator
             {
                 if (cells.Count == 2)
                 {
-                    graphs[candidate].AddLink(cells[0], cells[1], CandidateLinkType.Strong);
+                    graphs[candidate].AddEdge(cells[0], cells[1], CandidateChainEdgeType.Strong);
                     continue;
                 }
 
@@ -57,7 +57,7 @@ public static class CandidateLinkGraphGenerator
                 for (var firstIndex = 0; firstIndex < cells.Count; firstIndex++)
                 {
                     for (var secondIndex = firstIndex + 1; secondIndex < cells.Count; secondIndex++)
-                        graphs[candidate].AddLink(cells[firstIndex], cells[secondIndex], CandidateLinkType.Weak);
+                        graphs[candidate].AddEdge(cells[firstIndex], cells[secondIndex], CandidateChainEdgeType.Weak);
                 }
             }
         }

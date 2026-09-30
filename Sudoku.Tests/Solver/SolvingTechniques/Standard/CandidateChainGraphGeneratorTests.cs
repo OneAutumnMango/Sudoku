@@ -5,17 +5,17 @@ using Sudoku.Tests.TestUtils;
 
 namespace Sudoku.Tests.Solver.SolvingTechniques.Standard;
 
-public class CandidateLinkGraphGeneratorTests
+public class CandidateChainGraphGeneratorTests
 {
     [Fact]
     public void GenerateStrongGraph_IncludesConjugatePairsOnly()
     {
         var puzzle = WithCandidateOnlyIn((0, 0), (0, 1), (1, 2));
 
-        var graph = CandidateLinkGraphGenerator.GenerateStrongGraph(puzzle)[1];
+        var graph = CandidateChainGraphGenerator.GenerateStrongGraph(puzzle)[1];
 
-        Assert.Equal(CandidateLinkType.Strong, graph.GetLinks(puzzle.Board[0, 0])[puzzle.Board[0, 1]]);
-        Assert.False(graph.GetLinks(puzzle.Board[0, 0]).ContainsKey(puzzle.Board[1, 2]));
+        Assert.Equal(CandidateChainEdgeType.Strong, graph.GetEdges(puzzle.Board[0, 0])[puzzle.Board[0, 1]]);
+        Assert.False(graph.GetEdges(puzzle.Board[0, 0]).ContainsKey(puzzle.Board[1, 2]));
     }
 
     [Fact]
@@ -23,17 +23,17 @@ public class CandidateLinkGraphGeneratorTests
     {
         var puzzle = WithCandidateOnlyIn((0, 0), (0, 1), (1, 2));
 
-        var graph = CandidateLinkGraphGenerator.GenerateStrongAndWeakGraph(puzzle)[1];
+        var graph = CandidateChainGraphGenerator.GenerateStrongAndWeakGraph(puzzle)[1];
 
-        Assert.Equal(CandidateLinkType.Strong, graph.GetLinks(puzzle.Board[0, 0])[puzzle.Board[0, 1]]);
-        Assert.Equal(CandidateLinkType.Weak, graph.GetLinks(puzzle.Board[0, 0])[puzzle.Board[1, 2]]);
-        Assert.Equal(CandidateLinkType.Weak, graph.GetLinks(puzzle.Board[1, 2])[puzzle.Board[0, 1]]);
+        Assert.Equal(CandidateChainEdgeType.Strong, graph.GetEdges(puzzle.Board[0, 0])[puzzle.Board[0, 1]]);
+        Assert.Equal(CandidateChainEdgeType.Weak, graph.GetEdges(puzzle.Board[0, 0])[puzzle.Board[1, 2]]);
+        Assert.Equal(CandidateChainEdgeType.Weak, graph.GetEdges(puzzle.Board[1, 2])[puzzle.Board[0, 1]]);
     }
 
     [Fact]
     public void GenerateStrongGraph_WhenPuzzleIsNull_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => CandidateLinkGraphGenerator.GenerateStrongGraph(null!));
+        Assert.Throws<ArgumentNullException>(() => CandidateChainGraphGenerator.GenerateStrongGraph(null!));
     }
 
     private static Puzzle WithCandidateOnlyIn(params (int Row, int Column)[] cells)
