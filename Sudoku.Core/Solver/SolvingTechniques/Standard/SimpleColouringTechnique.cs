@@ -1,6 +1,6 @@
-using System.Numerics;
 using Sudoku.Core.Constraints;
 using Sudoku.Core.Grid;
+using Sudoku.Core.Solver.Graphs;
 
 namespace Sudoku.Core.Solver.SolvingTechniques.Standard;
 
@@ -20,7 +20,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
         // check degree 1 cells for collisions
         // remove all candidates for a colour if a collision is found
 
-        var graphs = GenerateAllConjugatePairGraphs(puzzle);
+        var graphs = CandidateLinkGraphGenerator.GenerateStrongGraph(puzzle);
 
         for (byte cand = 1; cand <= puzzle.Board.Size; cand++)
         {
@@ -41,31 +41,8 @@ public class SimpleColouringTechnique : ISolvingTechnique
     }
 
 
-    private Dictionary<byte, Dictionary<Cell, HashSet<Cell>>> GenerateAllConjugatePairGraphs(Puzzle puzzle)
-    {
-        var constraintGraphs = puzzle.RuleSet
-            .GetConstraints()
-            .Select(GenerateConjugatePairsAdjacencyList)
-            .ToList();
-
-        return Enumerable.Range(1, puzzle.Board.Size)
-            .Select(cand => (byte)cand)
-            .ToDictionary(
-                cand => cand,
-                cand => constraintGraphs
-                    .SelectMany(graph => graph.GetValueOrDefault(cand, []))
-                    .GroupBy(pair => pair.Key)
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group
-                            .SelectMany(pair => pair.Value)
-                            .ToHashSet()
-                    )
-            );
-    }
-
     private IEnumerable<ColouredComponent> GetColouredConnectedComponents(
-        Dictionary<Cell, HashSet<Cell>> graph)
+        Dictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph)
     {
         var visited = new HashSet<Cell>();
 
@@ -90,7 +67,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
 
                 var nextColour = colours[current] == Colour.Red ? Colour.Blue : Colour.Red;
 
-                foreach (var neighbour in graph[current])
+                foreach (var neighbour in graph[current].Keys)
                 {
                     // colouring conflict cannot occur (at least it shouldnt i think) but this is a safety check anyways
                     if (colours.TryGetValue(neighbour, out var existingColour))
@@ -118,7 +95,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
     private int ApplySameColourCollision(
         Puzzle puzzle,
         byte cand,
-        Dictionary<Cell, HashSet<Cell>> graph,
+        Dictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph,
         HashSet<Cell> componentCells,
         Dictionary<Cell, Colour> colours)
     {
@@ -168,63 +145,6 @@ public class SimpleColouringTechnique : ISolvingTechnique
 
         return applied;
     }
-
-    private Dictionary<byte, Dictionary<Cell, HashSet<Cell>>> GenerateConjugatePairsAdjacencyList(IConstraint constraint)
-    {
-        var result = new Dictionary<byte, Dictionary<Cell, HashSet<Cell>>>();
-
-        var cellCount = constraint.Cells.Count;
-
-        Cell[] first = new Cell[cellCount + 1];
-        Cell[] second = new Cell[cellCount + 1];
-        byte[] counts = new byte[cellCount + 1];
-
-        foreach (var cell in constraint.Cells)
-        {
-            if (cell.Value != 0)
-                continue;
-
-            ushort candidates = cell.Candidates;
-
-            while (candidates != 0)
-            {
-                int cand = BitOperations.TrailingZeroCount(candidates) + 1;
-                candidates &= (ushort)(candidates - 1);  // pop smallest bit
-
-                if (counts[cand] == 0)
-                    first[cand] = cell;
-                else if (counts[cand] == 1)
-                    second[cand] = cell;
-
-                counts[cand]++;
-            }
-        }
-
-        for (byte cand = 1; cand <= cellCount; cand++)
-        {
-            if (counts[cand] != 2)
-                continue;
-
-            var cell1 = first[cand];
-            var cell2 = second[cand];
-
-            if (!result.TryGetValue(cand, out var adjacency))
-            {
-                adjacency = [];
-                result[cand] = adjacency;
-            }
-
-            adjacency.TryAdd(cell1, []);
-            adjacency.TryAdd(cell2, []);
-
-            adjacency[cell1].Add(cell2);
-            adjacency[cell2].Add(cell1);
-        }
-
-        return result;
-    }
-
-
 
     private enum Colour
     {
