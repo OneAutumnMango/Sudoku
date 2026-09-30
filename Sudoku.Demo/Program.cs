@@ -37,6 +37,7 @@ void generateNSolvable(int n, string filePath)
     options.Converters.Add(new JsonStringEnumConverter());
 
     var numFailed = 0;
+    var techniqueUsage = new Dictionary<string, int>();
 
     // write all puzzles into json file at filepath one by one
     for (int i = 0; i < n; i++)
@@ -56,6 +57,9 @@ void generateNSolvable(int n, string filePath)
 
         var difficulty = maybeDifficulty.Value;
         var solvedPuzzleString = puzzle.Board.ToCompactString();
+
+        foreach (var (technique, count) in solver.GetTechniqueUsageCount())
+            techniqueUsage[technique] = techniqueUsage.GetValueOrDefault(technique) + count;
 
         var generatedPuzzle = new GeneratedPuzzle(
             Puzzle: puzzleString,
@@ -82,6 +86,9 @@ void generateNSolvable(int n, string filePath)
         Console.WriteLine($"Number of {difficulty} puzzles: {count}");
     }
     Console.WriteLine($"Number of failed puzzles: {numFailed}");
+    Console.WriteLine("Cumulative technique usage:");
+    foreach (var (technique, count) in techniqueUsage.OrderByDescending(entry => entry.Value))
+        Console.WriteLine($"{technique}: {count}");
 }
 
 
@@ -136,9 +143,27 @@ int[,] ParseGrid(string grid)
     return values;
 }
 
+void SolveAndDisplay(string grid)
+{
+    var puzzle = new Puzzle(new StandardRuleSet(), ParseGrid(grid));
+    var puzzleText = puzzle.Board.ToString();
+    var solver = new HumanlikeSolver(puzzle);
+
+    Console.WriteLine($"Puzzle: \n{puzzleText}");
+
+    var difficulty = solver.Solve();
+
+    Console.WriteLine($"Solution: \n{puzzle.Board}");
+    Console.WriteLine($"Difficulty: {(difficulty.IsSome ? difficulty.Value : "Unsolved")}");
+    Console.WriteLine("Technique usage:");
+    foreach (var (technique, count) in solver.GetTechniqueUsageCount())
+        Console.WriteLine($"{technique}: {count}");
+}
+
 GeneratedPuzzle? FindAndPrintPuzzleUsingTechnique(
     string techniqueName,
-    int maxAttempts = 10_000)
+    int maxAttempts = 10_000,
+    params string[] withoutTechniques)
 {
     for (var attempt = 1; attempt <= maxAttempts; attempt++)
     {
@@ -155,6 +180,9 @@ GeneratedPuzzle? FindAndPrintPuzzleUsingTechnique(
 
         var usage = solver.GetTechniqueUsageCount();
         if (!usage.TryGetValue(techniqueName, out var count) || count == 0)
+            continue;
+
+        if (withoutTechniques.Any(name => usage.GetValueOrDefault(name) > 0))
             continue;
 
         Console.WriteLine();
@@ -219,10 +247,23 @@ GeneratedPuzzle? FindAndPrintPuzzleWithDifficulty(
 }
 
 // FindAndPrintPuzzleUsingTechnique("XWingTechnique");
-FindAndPrintPuzzleUsingTechnique("SimpleColouringTechnique");
+// FindAndPrintPuzzleUsingTechnique(
+//     "TurbotFishTechnique",
+//     withoutTechniques: ["SimpleColouringTechnique"]);
+// SolveAndDisplay("""
+//     . . 3 . . . . . .
+//     . 6 . 3 . . . . 2
+//     5 9 . . . 7 . . 3
+//     . . . . . 2 9 8 .
+//     . 1 . . 5 . 4 . .
+//     . 2 . 4 . 9 . . 1
+//     8 . . . . 5 . . .
+//     9 . 5 . 6 . 7 . .
+//     2 . . . 8 . . . .
+//     """);
 // FindAndPrintPuzzleWithDifficulty(Difficulty.Advanced);
 
-// generateNSolvable(10000, "generated_puzzles.json");
+generateNSolvable(10000, "generated_puzzles.json");
 // regradeCorpus("generated_puzzles.json");
 
 // Console.WriteLine(". 8 . 2 . . . . 9\r\n. . 1 . . 5 . . .\r\n. . 6 7 . . . 3 .\r\n. 2 . . . . 1 . .\r\n. . . . 2 9 . . .\r\n. . 7 . . 6 5 . .\r\n. . 2 . 6 . . . .\r\n. 9 . . 5 4 . . 7\r\n6 . . . 7 . . 8 .");

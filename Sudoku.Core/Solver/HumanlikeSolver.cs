@@ -32,6 +32,7 @@ public class HumanlikeSolver(Puzzle puzzle)
             new JellyfishTechnique(),
 
             new SimpleColouringTechnique(),
+            new TurbotFishTechnique(),
         ];
 
         foreach (var difficulty in Enum.GetValues<Difficulty>())
