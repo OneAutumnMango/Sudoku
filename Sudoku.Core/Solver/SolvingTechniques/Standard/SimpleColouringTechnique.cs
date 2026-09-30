@@ -8,7 +8,6 @@ public class SimpleColouringTechnique : ISolvingTechnique
 {
     public Difficulty Difficulty { get; } = Difficulty.Advanced;
 
-    // this also adds the opportunity to remove all candidates that see both red and blue but i havent done that yet
     public int TryApply(Puzzle puzzle)
     {
         ArgumentNullException.ThrowIfNull(puzzle);
@@ -28,6 +27,13 @@ public class SimpleColouringTechnique : ISolvingTechnique
 
             foreach (var component in GetColouredConnectedComponents(graph))
             {
+                applied += ApplyOppositeColourElimination(
+                    puzzle,
+                    cand,
+                    graph,
+                    component.Cells,
+                    component.Colours);
+                
                 applied += ApplySameColourCollision(
                     puzzle,
                     cand,
@@ -141,6 +147,52 @@ public class SimpleColouringTechnique : ISolvingTechnique
                     applied++;
                 }
             }
+        }
+
+        return applied;
+    }
+
+    private int ApplyOppositeColourElimination(
+        Puzzle puzzle,
+        byte cand,
+        Dictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph,
+        HashSet<Cell> componentCells,
+        Dictionary<Cell, Colour> colours)
+    {
+        int applied = 0;
+
+        // union of cells in constraints with a red, and constraints with a blue
+        // intersect both sets
+        // remove candidates that arent coloured
+
+        var redCells = colours
+            .Where(pair => pair.Value == Colour.Red)
+            .Select(pair => pair.Key);
+
+        var blueCells = colours
+            .Where(pair => pair.Value == Colour.Blue)
+            .Select(pair => pair.Key);
+
+        var cellsSeeingRed = redCells
+            .SelectMany(cell => puzzle.RuleSet.GetContainingConstraints(cell))
+            .SelectMany(constraint => constraint.Cells)
+            .ToHashSet();
+
+        var cellsSeeingBlue = blueCells
+            .SelectMany(cell => puzzle.RuleSet.GetContainingConstraints(cell))
+            .SelectMany(constraint => constraint.Cells)
+            .ToHashSet();
+
+        var cellsSeeingBothColours = cellsSeeingRed
+            .Intersect(cellsSeeingBlue)
+            .Where(cell => !colours.ContainsKey(cell)
+                && cell.Value == 0
+                && cell.HasCandidate(cand));
+
+        foreach (var cell in cellsSeeingBothColours)
+        {
+            puzzle.RemoveCandidate(cell, cand);
+            applied++;
         }
 
         return applied;

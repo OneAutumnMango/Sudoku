@@ -55,6 +55,26 @@ public class SimpleColouringTechniqueTests
     }
 
     [Fact]
+    public void TryApply_RemovesCandidateFromUncolouredCellSeeingBothColours()
+    {
+        // One-based positions: (1,1), (1,5), (1,7), (4,5), (5,1), (5,4), (7,1).
+        var puzzle = WithCandidateOnlyIn(
+            PuzzleFactory.Empty(),
+            1,
+            (0, 0), (0, 4), (0, 6), (3, 4), (4, 0), (4, 3), (6, 0));
+        var snapshot = CandidateSnapshot.Capture(puzzle.Board);
+
+        var applied = new SimpleColouringTechnique().TryApply(puzzle);
+
+        Assert.Equal(1, applied);
+        CandidateAssert.Eliminated(snapshot, puzzle.Board, new Elimination(0, 0, 1));
+        Assert.True(puzzle.Board[0, 4].HasCandidate(1));
+        Assert.True(puzzle.Board[3, 4].HasCandidate(1));
+        Assert.True(puzzle.Board[4, 0].HasCandidate(1));
+        Assert.True(puzzle.Board[4, 3].HasCandidate(1));
+    }
+
+    [Fact]
     public void TryApply_WhenNoConjugatePairsExist_ReturnsZero()
     {
         var puzzle = PuzzleFactory.Empty();
