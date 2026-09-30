@@ -10,29 +10,23 @@ public enum CandidateLinkType
 
 public static class CandidateLinkGraphGenerator
 {
-    public static Dictionary<byte, Dictionary<Cell, Dictionary<Cell, CandidateLinkType>>> GenerateStrongGraph(
-        Puzzle puzzle)
+    public static CandidateLinkGraph GenerateStrongGraph(Puzzle puzzle)
     {
         return Generate(puzzle, includeWeakLinks: false);
     }
 
-    public static Dictionary<byte, Dictionary<Cell, Dictionary<Cell, CandidateLinkType>>> GenerateStrongAndWeakGraph(
-        Puzzle puzzle)
+    public static CandidateLinkGraph GenerateStrongAndWeakGraph(Puzzle puzzle)
     {
         return Generate(puzzle, includeWeakLinks: true);
     }
 
-    private static Dictionary<byte, Dictionary<Cell, Dictionary<Cell, CandidateLinkType>>> Generate(
+    private static CandidateLinkGraph Generate(
         Puzzle puzzle,
         bool includeWeakLinks)
     {
         ArgumentNullException.ThrowIfNull(puzzle);
 
-        var graphs = Enumerable.Range(1, puzzle.Board.Size)
-            .Select(candidate => (byte)candidate)
-            .ToDictionary(
-                candidate => candidate,
-                _ => new Dictionary<Cell, Dictionary<Cell, CandidateLinkType>>());
+        var graphs = new CandidateLinkGraph(puzzle.Board.Size);
 
         foreach (var constraint in puzzle.RuleSet.GetConstraints())
         {
@@ -53,7 +47,7 @@ public static class CandidateLinkGraphGenerator
             {
                 if (cells.Count == 2)
                 {
-                    AddLink(graphs[candidate], cells[0], cells[1], CandidateLinkType.Strong);
+                    graphs.AddLink(candidate, cells[0], cells[1], CandidateLinkType.Strong);
                     continue;
                 }
 
@@ -63,37 +57,11 @@ public static class CandidateLinkGraphGenerator
                 for (var firstIndex = 0; firstIndex < cells.Count; firstIndex++)
                 {
                     for (var secondIndex = firstIndex + 1; secondIndex < cells.Count; secondIndex++)
-                        AddLink(graphs[candidate], cells[firstIndex], cells[secondIndex], CandidateLinkType.Weak);
+                        graphs.AddLink(candidate, cells[firstIndex], cells[secondIndex], CandidateLinkType.Weak);
                 }
             }
         }
 
         return graphs;
-    }
-
-    private static void AddLink(
-        Dictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph,
-        Cell first,
-        Cell second,
-        CandidateLinkType linkType)
-    {
-        AddDirectedLink(first, second);
-        AddDirectedLink(second, first);
-
-        void AddDirectedLink(Cell from, Cell to)
-        {
-            if (!graph.TryGetValue(from, out var neighbours))
-            {
-                neighbours = [];
-                graph[from] = neighbours;
-            }
-
-            if (!neighbours.TryGetValue(to, out var existingType)
-                || linkType == CandidateLinkType.Strong
-                || existingType != CandidateLinkType.Strong)
-            {
-                neighbours[to] = linkType;
-            }
-        }
     }
 }

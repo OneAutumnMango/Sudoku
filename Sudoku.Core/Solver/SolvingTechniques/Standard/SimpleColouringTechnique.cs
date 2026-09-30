@@ -48,7 +48,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
 
 
     private IEnumerable<ColouredComponent> GetColouredConnectedComponents(
-        Dictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph)
+        IReadOnlyDictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph)
     {
         var visited = new HashSet<Cell>();
 
@@ -101,7 +101,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
     private int ApplySameColourCollision(
         Puzzle puzzle,
         byte cand,
-        Dictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph,
+        IReadOnlyDictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph,
         HashSet<Cell> componentCells,
         Dictionary<Cell, Colour> colours)
     {
@@ -155,7 +155,7 @@ public class SimpleColouringTechnique : ISolvingTechnique
     private int ApplyOppositeColourElimination(
         Puzzle puzzle,
         byte cand,
-        Dictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph,
+        IReadOnlyDictionary<Cell, Dictionary<Cell, CandidateLinkType>> graph,
         HashSet<Cell> componentCells,
         Dictionary<Cell, Colour> colours)
     {
